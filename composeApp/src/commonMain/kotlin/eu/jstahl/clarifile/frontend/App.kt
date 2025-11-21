@@ -1,61 +1,60 @@
 package eu.jstahl.clarifile.frontend
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import eu.jstahl.clarifile.backend.Storage
 import eu.jstahl.clarifile.database.FileDao
 import eu.jstahl.clarifile.database.FileEntity
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 @Preview
 fun App(storage: Storage) {
 
     MaterialTheme {
-        var showContent by remember { mutableStateOf(false) }
+        val selectedTags = remember { mutableStateListOf<String>() }
 
-        val tags = storage.getTags()
-        val tagStates = HashMap<String, MutableState<Boolean>>()
-        tags.forEach { tag -> tagStates[tag] = remember { mutableStateOf(true) } }
-
-        Scaffold(floatingActionButton = {
-            FloatingActionButton(onClick = { }) {
-                Text("Add")
+        Scaffold(
+            topBar = {
+                TopAppBar(title = { Text("Clarifile") })
+            },
+            floatingActionButton = {
+                ExtendedFloatingActionButton(onClick = { }) {
+                    Text("Add file")
+                }
             }
-        }) { paddingValues ->
-            FilterChip(
-                onClick = { showContent = !showContent },
-                label = { Text(if (showContent) "a" else "b") },
-                selected = showContent
-            )
+        ) { paddingValues ->
             Column(
                 modifier = Modifier
-                    .background(MaterialTheme.colorScheme.primaryContainer)
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.surface)
                     .safeContentPadding()
-                    .fillMaxSize(),
+                    .padding(paddingValues),
                 horizontalAlignment = Alignment.Start,
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text("Tags:")
-                    for (tag in tags) {
-                        var state by tagStates[tag]!!
-                        FilterChip(
-                            onClick = { state = !state },
-                            label = { Text(tag) },
-                            selected = state
-                        )
-                    }
+                Column(modifier =
+                    Modifier.padding(16.dp)
+                        .fillMaxWidth()) {
+                    // Single text field tag selector with chips inside
+                    TagSelector(
+                        selectedTags = selectedTags,
+                        onAddTag = { tag -> if (tag !in selectedTags) selectedTags.add(tag) },
+                        onRemoveTag = { tag -> selectedTags.remove(tag) }
+                    )
                 }
-                HorizontalDivider()
+                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
             }
         }
     }
