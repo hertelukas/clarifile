@@ -8,4 +8,8 @@ object Storage {
     fun getFile(fileRequest: FileRequest): List<File> {
         return emptyList()
     }
+
+    fun getTags(): List<String> {
+        return listOf("a", "b", "c")
+    }
 }

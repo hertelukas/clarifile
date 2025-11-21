@@ -2,6 +2,7 @@ package eu.jstahl.clarifile
 
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.window.ComposeViewport
+import eu.jstahl.clarifile.frontend.App
 
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
