@@ -1,6 +1,7 @@
 package eu.jstahl.clarifile.backend
 
 import eu.jstahl.clarifile.database.FileDao
+import kotlinx.coroutines.flow.Flow
 
 class File(private val id: Long, private val dao: FileDao) {
 
@@ -12,8 +13,8 @@ class File(private val id: Long, private val dao: FileDao) {
         return dao.getFileNameByID(id)
     }
 
-    fun getTags(): List<String> {
-        return emptyList()
+    fun getTags(): Flow<List<String>> {
+        return dao.getFileTags(id)
     }
 
     fun addTag(tag: String) {}

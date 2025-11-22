@@ -60,5 +60,9 @@ interface FileDao {
 
     @Transaction
     @Query("UPDATE files SET name = :newName WHERE id = :id")
-    suspend fun updateNameByID(id: Long, name: String)
+    suspend fun updateNameByID(id: Long, newName: String)
+
+    @Transaction
+    @Query("SELECT t.content FROM files f INNER JOIN file_tags ft ON f.id = ft.fileId INNER JOIN tags t ON ft.tagId = t.id WHERE f.id = :fileId ")
+    fun getFileTags(fileId: Long): Flow<List<String>>
 }
