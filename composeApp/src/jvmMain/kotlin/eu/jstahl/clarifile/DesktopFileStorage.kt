@@ -3,6 +3,7 @@ package eu.jstahl.clarifile
 import eu.jstahl.clarifile.backend.FileStorage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.FileNotFoundException
 import java.nio.file.*
 import kotlin.io.path.*
 
@@ -22,13 +23,25 @@ class DesktopFileStorage : FileStorage {
 
     override suspend fun saveFile(sourcePath: String, id: Long) {
         val source = Paths.get(sourcePath)
-        val dest = dataFolder.resolve(id.toString())
+        val fileFolder = dataFolder.resolve(id.toString())
 
-        // Dispatchers.IO is implicit in nio calls usually, but good to be safe
+        val dest = fileFolder.resolve(source.fileName)
+
         withContext(Dispatchers.IO) {
+            if (!fileFolder.exists()) {
+                Files.createDirectories(fileFolder)
+            }
             Files.copy(source, dest, StandardCopyOption.REPLACE_EXISTING)
         }
     }
 
-    override fun getAbsolutePath(id: Long): String = dataFolder.resolve(id.toString()).toString()
-}
+    override fun getAbsolutePath(id: Long): String {
+        val folder = dataFolder.resolve(id.toString())
+
+
+        return Files.list(folder).use { stream ->
+            stream.findFirst()
+                .map { it.toAbsolutePath().toString() }
+                .orElseThrow { FileNotFoundException("No file found for ID $id") }
+        }
+    }}
