@@ -53,9 +53,10 @@ fun App(storage: Storage) {
         mode = PickerMode.Multiple()
     ) { files ->
         files?.let {
-            for (file in it) {
-                scope.launch {
-                    editingFile = storage.addFile(file.getStoragePath(), file.name, file.extension)
+            scope.launch {
+                for (file in it) {
+                    val file = storage.addFile(file.getStoragePath(), file.name, file.extension)
+                    if (it.size == 1) editingFile = file
                 }
             }
         }
