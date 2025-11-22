@@ -4,13 +4,17 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -20,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import eu.jstahl.clarifile.backend.FileRequest
 import eu.jstahl.clarifile.backend.LogicalOperator
 import eu.jstahl.clarifile.backend.Storage
+import eu.jstahl.clarifile.backend.File
 import io.github.vinceglb.filekit.compose.rememberFilePickerLauncher
 import io.github.vinceglb.filekit.core.PickerType
 import kotlinx.coroutines.launch
@@ -100,6 +105,10 @@ fun App(storage: Storage) {
                     val files by remember(selectedTags.toList()) { storage.getFiles(FileRequest(selectedTags, LogicalOperator.And)) }
                         .collectAsState(initial = emptyList())
 
+                    var editingFile by remember { mutableStateOf<File?>(null) }
+                    var editingName by remember { mutableStateOf("") }
+                    var editingTagsInput by remember { mutableStateOf("") }
+
                     for (file in files) {
                         Box(
                             modifier = Modifier
@@ -123,7 +132,19 @@ fun App(storage: Storage) {
                                 }
                                 val fileTags by remember { file.getTags() }
                                     .collectAsState(initial = emptyList())
-                                Text(fileName)
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(fileName, modifier = Modifier.weight(1f))
+                                    IconButton(onClick = {
+                                        editingFile = file
+                                        editingName = fileName
+                                        editingTagsInput = fileTags.joinToString(" ")
+                                    }) {
+                                        Icon(Icons.Filled.Edit, contentDescription = "Edit")
+                                    }
+                                }
                                 if (fileTags.isNotEmpty())
                                     Text(
                                         fileTags.joinToString(", "),
@@ -132,6 +153,22 @@ fun App(storage: Storage) {
                             }
                         }
                         Spacer(modifier = Modifier.height(8.dp))
+                    }
+
+                    if (editingFile != null) {
+                        FileEditorDialog(
+                            storage = storage,
+                            initialName = editingName,
+                            initialTagsInput = editingTagsInput,
+                            onConfirm = { newName, tags ->
+                                // STUB: Implement actual rename / tag updates later
+                                // For now, simply close dialog. You may wire your logic here.
+                                // Example (uncomment to actually rename):
+                                // scope.launch { editingFile?.setName(newName) }
+                                editingFile = null
+                            },
+                            onDismiss = { editingFile = null }
+                        )
                     }
                 }
             }

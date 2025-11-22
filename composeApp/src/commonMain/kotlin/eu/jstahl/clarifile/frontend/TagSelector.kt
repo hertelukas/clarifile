@@ -43,6 +43,7 @@ fun TagSelector(
     selectedTags: List<String>,
     onAddTag: (String) -> Unit,
     onRemoveTag: (String) -> Unit = {},
+    allowFreeText: Boolean = false,
 ) {
     var dropdownExpanded by remember { mutableStateOf(false) }
     var tagInput by remember { mutableStateOf("") }
@@ -51,12 +52,17 @@ fun TagSelector(
         selectedTags.none { it.equals(existing, ignoreCase = true) }
     }
 
-    fun tryAddExactMatch() {
+    fun tryAddFromInput() {
         val input = tagInput.trim()
         if (input.isEmpty()) return
         val exactExisting = availableTags.firstOrNull { it.equals(input, ignoreCase = true) }
-        if (exactExisting != null) {
-            onAddTag(exactExisting)
+        val toAdd = when {
+            exactExisting != null -> exactExisting
+            allowFreeText -> input
+            else -> null
+        }
+        toAdd?.let {
+            onAddTag(it)
             tagInput = ""
             dropdownExpanded = false
         }
@@ -67,6 +73,10 @@ fun TagSelector(
     Box(
         modifier = Modifier.fillMaxWidth()
     ) {
+        // Decide where to show the hint: inline (placeholder) when there are no chips
+        // or when the user is typing; otherwise show it as supporting text underneath
+        val showInlinePlaceholder = selectedTags.isEmpty() || tagInput.isNotEmpty()
+
         OutlinedTextField(
             label = { Text("Tags") },
             value = tagInput,
@@ -75,17 +85,20 @@ fun TagSelector(
                 dropdownExpanded = true
             },
             singleLine = true,
-            placeholder = { Text("Search tags") },
+            placeholder = if (showInlinePlaceholder) ({ Text("Search tags") }) else null,
+            supportingText = if (!showInlinePlaceholder) ({ Text("Search tags") }) else null,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(onDone = {
                 val filtered = if (tagInput.isBlank()) availableTags else availableTags.filter {
                     it.contains(tagInput, ignoreCase = true)
                 }
                 if (dropdownExpanded && filtered.isNotEmpty()) {
-                    tagInput = ""
-                    dropdownExpanded = false
+                    // keep menu open; choose explicitly or add current token if allowed
+                    if (allowFreeText) {
+                        tryAddFromInput()
+                    }
                 } else {
-                    tryAddExactMatch()
+                    tryAddFromInput()
                 }
             }),
             modifier = Modifier
@@ -123,20 +136,34 @@ fun TagSelector(
         val hasSuggestions = filtered.isNotEmpty()
 
         DropdownMenu(
-            expanded = dropdownExpanded && hasSuggestions,
+            expanded = dropdownExpanded && (hasSuggestions || (allowFreeText && tagInput.isNotBlank())),
             onDismissRequest = { dropdownExpanded = false },
             properties = PopupProperties(focusable = false),
         ) {
-            if (availableTags.isEmpty()) {
+            if (!allowFreeText && availableTags.isEmpty()) {
                 DropdownMenuItem(
                     text = { Text("No more tags") },
                     onClick = { dropdownExpanded = false }
                 )
             } else if (filtered.isEmpty()) {
-                DropdownMenuItem(
-                    text = { Text("No matches") },
-                    onClick = { }
-                )
+                if (allowFreeText) {
+                    val toAdd = tagInput.trim()
+                    if (toAdd.isNotEmpty()) {
+                        DropdownMenuItem(
+                            text = { Text("Add '$toAdd'") },
+                            onClick = {
+                                onAddTag(toAdd)
+                                tagInput = ""
+                                dropdownExpanded = false
+                            }
+                        )
+                    }
+                } else {
+                    DropdownMenuItem(
+                        text = { Text("No matches") },
+                        onClick = { }
+                    )
+                }
             } else {
                 filtered.forEachIndexed { index, tag ->
                     DropdownMenuItem(
@@ -152,6 +179,19 @@ fun TagSelector(
                             dropdownExpanded = false
                         }
                     )
+                }
+                if (allowFreeText) {
+                    val toAdd = tagInput.trim()
+                    if (toAdd.isNotEmpty() && filtered.none { it.equals(toAdd, ignoreCase = true) }) {
+                        DropdownMenuItem(
+                            text = { Text("Add '$toAdd'") },
+                            onClick = {
+                                onAddTag(toAdd)
+                                tagInput = ""
+                                dropdownExpanded = false
+                            }
+                        )
+                    }
                 }
             }
         }
