@@ -1,12 +1,18 @@
 package eu.jstahl.clarifile.backend
 
-class File(private var name: String, private var tags: List<String>, private val id: Int = 0) {
+import eu.jstahl.clarifile.database.FileDao
+
+class File(private val id: Long, private val dao: FileDao) {
 
     fun setName(name: String) {}
 
-    fun getName(): String = name
+    fun getName(): String {
+        return ""
+    }
 
-    fun getTags(): List<String> = tags
+    fun getTags(): List<String> {
+        return emptyList()
+    }
 
     fun addTag(tag: String) {}
 }

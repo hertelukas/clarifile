@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import eu.jstahl.clarifile.backend.Storage
 import eu.jstahl.clarifile.database.FileDao
 import eu.jstahl.clarifile.database.FileEntity
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -25,6 +26,8 @@ fun App(storage: Storage) {
 
     MaterialTheme {
         val selectedTags = remember { mutableStateListOf<String>() }
+
+        val scope = rememberCoroutineScope()
 
         Scaffold(
             topBar = {
@@ -41,7 +44,9 @@ fun App(storage: Storage) {
                 horizontalAlignment = Alignment.Start,
             ) {
                 Button(onClick = {
-                    storage.addFile("~/geheimedokumente.txb")
+                    scope.launch {
+                        storage.addFile("~/geheimedokumente.txb")
+                    }
                 }) {
                     Text("Add file")
                 }
