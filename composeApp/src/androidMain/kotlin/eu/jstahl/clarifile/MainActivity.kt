@@ -15,16 +15,13 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
-        // 1. Build the Database
-        // We use the standard Android Builder and pass it to your common configuration function
         val builder = Room.databaseBuilder(
             applicationContext,
             AppDatabase::class.java,
             "clarifile.db"
         )
 
-        // 2. Create dependencies
-        // getRoomDatabase(builder) must be your common function returning AppDatabase
+
         val database = getRoomDatabase(builder)
         val dao = database.fileDao()
         val fileStorage = AndroidFileStorage(applicationContext)
@@ -38,12 +35,3 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-// Note: The Preview is commented out because 'Storage' requires a real Database/File system.
-// To fix this, you would need to extract an interface (IStorage) and create a FakeStorage for previews.
-/*
-@Preview
-@Composable
-fun AppAndroidPreview() {
-    App(Storage(..., ...))
-}
-*/
