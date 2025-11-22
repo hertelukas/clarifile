@@ -17,7 +17,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import eu.jstahl.clarifile.backend.File
+import eu.jstahl.clarifile.backend.FileRequest
 import eu.jstahl.clarifile.backend.GeoLocation
+import eu.jstahl.clarifile.backend.LogicalOperator
 import eu.jstahl.clarifile.backend.Storage
 import kotlin.math.*
 
@@ -29,15 +31,12 @@ fun MapScreen(storage: Storage, onEditFile: (File) -> Unit) {
     
     // Collect all files with GPS locations once
     val allFilesWithLocations by produceState<List<Pair<File, GeoLocation>>>(initialValue = emptyList()) {
-        val files = mutableListOf<File>()
-        storage.getFiles(eu.jstahl.clarifile.backend.FileRequest(emptyList(), eu.jstahl.clarifile.backend.LogicalOperator.And, ""))
+        storage.getFiles(FileRequest(emptyList(), LogicalOperator.And, ""))
             .collect { fileList ->
-                files.clear()
-                files.addAll(fileList)
+                value = fileList.mapNotNull { file ->
+                    file.getGpsLocation()?.let { location -> file to location }
+                }
             }
-        value = files.mapNotNull { file ->
-            file.getGpsLocation()?.let { location -> file to location }
-        }
     }
     
     Column(

@@ -107,8 +107,8 @@ fun FilesScreen(storage: Storage, onEditFile: (File) -> Unit) {
                     selectedTags,
                     LogicalOperator.And,
                     searchName
-                )) }
-                .collectAsState(initial = emptyList())
+                ))
+            }.collectAsState(initial = emptyList())
 
             for (file in files) {
                 FileListItem(
