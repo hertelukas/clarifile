@@ -8,5 +8,6 @@ enum class LogicalOperator {
 data class FileRequest(
     val tags: List<String>,
     val tagOperator: LogicalOperator = LogicalOperator.Or,
-    val searchString: String = ""
+    val searchString: String = "",
+    val extension: String? = null
 )

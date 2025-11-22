@@ -46,13 +46,14 @@ class Storage(private val dao: FileDao, private val fileStorage: FileStorage) {
 
     fun getFiles(fileRequest: FileRequest): Flow<List<File>> {
         val flow: Flow<List<Long>> = when {
-            fileRequest.tags.isEmpty() -> dao.searchFilesByName(fileRequest.searchString)
+            fileRequest.tags.isEmpty() -> 
+                dao.searchFilesByName(fileRequest.searchString, fileRequest.extension)
 
             fileRequest.tagOperator == LogicalOperator.Or ->
-                dao.getFilesByAnyTag(fileRequest.searchString, fileRequest.tags)
+                dao.getFilesByAnyTag(fileRequest.searchString, fileRequest.tags, fileRequest.extension)
 
             fileRequest.tagOperator == LogicalOperator.And ->
-                dao.getFilesByAllTags(fileRequest.searchString, fileRequest.tags, fileRequest.tags.size)
+                dao.getFilesByAllTags(fileRequest.searchString, fileRequest.tags, fileRequest.tags.size, fileRequest.extension)
 
             else -> dao.getAllFiles() // Fallback
         }
@@ -65,7 +66,7 @@ class Storage(private val dao: FileDao, private val fileStorage: FileStorage) {
     }
 
     fun getExtensions(): Flow<List<String>> {
-        return dao.getDistinctTags()
+        return dao.getDistinctExtensions()
     }
 
     suspend fun autoTagLocation(file: File) {

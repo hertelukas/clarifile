@@ -25,10 +25,9 @@ abstract class FileDao {
     @Query("SELECT content FROM tags")
     abstract fun getAllTags(): Flow<List<String>>
 
-    @Query("SELECT id FROM files WHERE name LIKE '%' || :searchString || '%'")
-    abstract fun searchFilesByName(searchString: String): Flow<List<Long>>
+    @Query("SELECT id FROM files WHERE name LIKE '%' || :searchString || '%' AND (:extension IS NULL OR extension = :extension)")
+    abstract fun searchFilesByName(searchString: String, extension: String? = null): Flow<List<Long>>
 
-    // 2. OR Logic: Files that match at least one tag
     @Transaction
     @Query(
         """
@@ -37,9 +36,10 @@ abstract class FileDao {
         INNER JOIN tags t ON ft.tagId = t.id
         WHERE t.content IN (:tags)
         AND (f.name LIKE '%' || :searchString || '%')
+        AND (:extension IS NULL OR f.extension = :extension)
     """
     )
-    abstract fun getFilesByAnyTag(searchString: String, tags: List<String>): Flow<List<Long>>
+    abstract fun getFilesByAnyTag(searchString: String, tags: List<String>, extension: String? = null): Flow<List<Long>>
 
     @Transaction
     @Query(
@@ -49,11 +49,13 @@ abstract class FileDao {
     INNER JOIN tags t ON ft.tagId = t.id
     WHERE t.content IN (:tags)
     AND (f.name LIKE '%' || :searchString || '%')
+    AND (:extension IS NULL OR f.extension = :extension)
     GROUP BY f.id
     HAVING COUNT(DISTINCT t.content) = :tagCount
 """
     )
-    abstract fun getFilesByAllTags(searchString: String, tags: List<String>, tagCount: Int): Flow<List<Long>>
+    abstract fun getFilesByAllTags(searchString: String, tags: List<String>, tagCount: Int, extension: String? = null): Flow<List<Long>>
+
 
     @Transaction
     @Query("SELECT f.name FROM files f WHERE id = :id")
@@ -101,4 +103,7 @@ abstract class FileDao {
 
     @Query("SELECT DISTINCT content FROM tags")
     abstract fun getDistinctTags(): Flow<List<String>>
+
+    @Query("SELECT DISTINCT extension FROM files WHERE extension IS NOT NULL AND extension != '' ORDER BY extension")
+    abstract fun getDistinctExtensions(): Flow<List<String>>
 }
