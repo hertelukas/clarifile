@@ -1,8 +1,9 @@
 package eu.jstahl.clarifile.frontend
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
@@ -48,7 +49,9 @@ fun TagSelector(
         }
     }
 
-    Box(
+    ExposedDropdownMenuBox(
+        expanded = dropdownExpanded,
+        onExpandedChange = { dropdownExpanded = it },
         modifier = Modifier.fillMaxWidth()
     ) {
         // Decide where to show the hint: inline (placeholder) when there are no chips
@@ -64,14 +67,23 @@ fun TagSelector(
             },
             singleLine = true,
             placeholder = if (showInlinePlaceholder) ({ Text("Search tags") }) else null,
+            trailingIcon = {
+                // Show the standard exposed-dropdown icon to hint interactivity and allow toggling
+                ExposedDropdownMenuDefaults.TrailingIcon(expanded = dropdownExpanded)
+            },
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(onDone = {
                 val filtered = if (tagInput.isBlank()) availableTags else availableTags.filter {
                     it.contains(tagInput, ignoreCase = true)
                 }
                 if (dropdownExpanded && filtered.isNotEmpty()) {
-                    // keep menu open; choose explicitly or add current token if allowed
-                    if (allowFreeText) {
+                    // When free text disabled, add the first suggestion on IME action
+                    if (!allowFreeText) {
+                        onAddTag(filtered.first())
+                        tagInput = ""
+                        dropdownExpanded = false
+                    } else {
+                        // With free text, try adding the current input
                         tryAddFromInput()
                     }
                 } else {
@@ -79,13 +91,8 @@ fun TagSelector(
                 }
             }),
             modifier = Modifier
+                .menuAnchor()
                 .fillMaxWidth()
-                .clickable(
-                    indication = null,
-                    interactionSource = remember { MutableInteractionSource() }
-                ) {
-                    dropdownExpanded = true
-                }
                 .onFocusChanged { state ->
                     dropdownExpanded = if (state.hasFocus) true else dropdownExpanded
                 },
@@ -112,7 +119,7 @@ fun TagSelector(
         }
         val hasSuggestions = filtered.isNotEmpty()
 
-        DropdownMenu(
+        ExposedDropdownMenu(
             expanded = dropdownExpanded && (hasSuggestions || (allowFreeText && tagInput.isNotBlank())),
             onDismissRequest = { dropdownExpanded = false },
         ) {

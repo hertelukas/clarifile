@@ -52,151 +52,144 @@ fun App(storage: Storage) {
         var searchName by remember { mutableStateOf("") }
         val selectedTags = remember { mutableStateListOf<String>() }
 
-        Scaffold(
-            topBar = {
-                TopAppBar(title = { Text("Clarifile") })
-            }
-        ) { paddingValues ->
-            Column(
-                modifier = Modifier.fillMaxSize()
-                    .padding(paddingValues),
-                horizontalAlignment = Alignment.Start
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.Start
+        ) {
+            Button(
+                modifier = Modifier
+                        .padding(16.dp),
+                onClick = {
+                    filePicker.launch()
+                }
             ) {
-                Button(
-                    modifier = Modifier
-                            .padding(16.dp),
-                    onClick = {
-                        filePicker.launch()
-                    }
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Add,
-                        contentDescription = "Add",
-                        modifier = Modifier.size(28.dp)
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text("Add file")
-                }
-                Box(
-                    modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
-                            .safeContentPadding()
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(
-                                color = MaterialTheme.colorScheme.primaryContainer,
-                                shape = RoundedCornerShape(12.dp)
-                            ),
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalAlignment = Alignment.Start
-                    ) {
-                        Column(
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            OutlinedTextField(
-                                modifier = Modifier.fillMaxWidth(),
-                                label = { Text("Name")},
-                                placeholder = { Text("Search for name") },
-                                value = searchName,
-                                singleLine = true,
-                                onValueChange = { value ->
-                                    searchName = value
-                                }
-                            )
-                            TagSelector(
-                                storage,
-                                selectedTags = selectedTags,
-                                onAddTag = { tag -> if (tag !in selectedTags) selectedTags.add(tag) },
-                                onRemoveTag = { tag -> selectedTags.remove(tag) },
-                            )
-                        }
-                    }
-                }
-
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
+                Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = "Add",
+                    modifier = Modifier.size(28.dp)
+                )
+                Spacer(Modifier.width(8.dp))
+                Text("Add file")
+            }
+            Box(
+                modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp)
                         .safeContentPadding()
-                        .verticalScroll(rememberScrollState()),
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            shape = RoundedCornerShape(12.dp)
+                        ),
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
                     horizontalAlignment = Alignment.Start
                 ) {
-                    val files by remember(selectedTags.toList(), searchName) {
-                        storage.getFiles(FileRequest(
-                            selectedTags,
-                            LogicalOperator.And,
-                            searchName
-                        )) }
-                        .collectAsState(initial = emptyList())
+                    Column(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        OutlinedTextField(
+                            modifier = Modifier.fillMaxWidth(),
+                            label = { Text("Name")},
+                            placeholder = { Text("Search for name") },
+                            value = searchName,
+                            singleLine = true,
+                            onValueChange = { value ->
+                                searchName = value
+                            }
+                        )
+                        TagSelector(
+                            storage,
+                            selectedTags = selectedTags,
+                            onAddTag = { tag -> if (tag !in selectedTags) selectedTags.add(tag) },
+                            onRemoveTag = { tag -> selectedTags.remove(tag) },
+                        )
+                    }
+                }
+            }
 
-                    for (file in files) {
-                        Box(
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .safeContentPadding()
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.Start
+            ) {
+                val files by remember(selectedTags.toList(), searchName) {
+                    storage.getFiles(FileRequest(
+                        selectedTags,
+                        LogicalOperator.And,
+                        searchName
+                    )) }
+                    .collectAsState(initial = emptyList())
+
+                for (file in files) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .safeContentPadding()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(
+                                color = Color.LightGray,
+                                shape = RoundedCornerShape(12.dp)
+                            ),
+                    ) {
+                        Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .safeContentPadding()
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(
-                                    color = Color.LightGray,
-                                    shape = RoundedCornerShape(12.dp)
-                                ),
+                                .padding(16.dp)
+                                .safeContentPadding(),
+                            horizontalAlignment = Alignment.Start
                         ) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp)
-                                    .safeContentPadding(),
-                                horizontalAlignment = Alignment.Start
+                            val fileName by produceState(initialValue = "Loading...", file) {
+                                value = file.getName()
+                            }
+                            val fileTags by remember(file.getTags()) { file.getTags() }
+                                .collectAsState(initial = emptyList())
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                val fileName by produceState(initialValue = "Loading...", file) {
-                                    value = file.getName()
+                                Text(fileName, modifier = Modifier.weight(1f))
+                                IconButton(onClick = {
+                                    editingFile = file
+                                }) {
+                                    Icon(Icons.Filled.Edit, contentDescription = "Edit")
                                 }
-                                val fileTags by remember(file.getTags()) { file.getTags() }
-                                    .collectAsState(initial = emptyList())
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    verticalAlignment = Alignment.CenterVertically
+                            }
+                            if (fileTags.isNotEmpty()) {
+                                FlowRow(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
-                                    Text(fileName, modifier = Modifier.weight(1f))
-                                    IconButton(onClick = {
-                                        editingFile = file
-                                    }) {
-                                        Icon(Icons.Filled.Edit, contentDescription = "Edit")
-                                    }
-                                }
-                                if (fileTags.isNotEmpty()) {
-                                    FlowRow(
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                                    ) {
-                                        fileTags.forEach { tag ->
-                                            LabelChip(text = tag)
-                                        }
+                                    fileTags.forEach { tag ->
+                                        LabelChip(text = tag)
                                     }
                                 }
                             }
                         }
-                        Spacer(modifier = Modifier.height(8.dp))
                     }
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
 
-                    if (editingFile != null) {
-                        FileEditorDialog(
-                            storage = storage,
-                            file = editingFile!!,
-                            onConfirm = { newName, tags ->
-                                scope.launch {
-                                    editingFile?.setName(newName)
-                                    editingFile?.setTags(tags)
-                                    editingFile = null
-                                }
-                            },
-                            onDismiss = { editingFile = null }
-                        )
-                    }
+                if (editingFile != null) {
+                    FileEditorDialog(
+                        storage = storage,
+                        file = editingFile!!,
+                        onConfirm = { newName, tags ->
+                            scope.launch {
+                                editingFile?.setName(newName)
+                                editingFile?.setTags(tags)
+                                editingFile = null
+                            }
+                        },
+                        onDismiss = { editingFile = null }
+                    )
                 }
             }
         }
