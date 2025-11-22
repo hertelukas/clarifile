@@ -121,10 +121,12 @@ fun App(storage: Storage) {
                                 val fileName by produceState(initialValue = "Loading...", file) {
                                     value = file.getName()
                                 }
+                                val fileTags by remember { file.getTags() }
+                                    .collectAsState(initial = emptyList())
                                 Text(fileName)
-                                if (file.getTags().isNotEmpty())
+                                if (fileTags.isNotEmpty())
                                     Text(
-                                        file.getTags().joinToString(", "),
+                                        fileTags.joinToString(", "),
                                         fontStyle = FontStyle.Italic
                                     )
                             }
