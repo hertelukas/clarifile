@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -61,6 +62,21 @@ fun App(storage: Storage) {
                     .padding(paddingValues),
                 horizontalAlignment = Alignment.Start
             ) {
+                Button(
+                    modifier = Modifier
+                            .padding(16.dp),
+                    onClick = {
+                        filePicker.launch()
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Add,
+                        contentDescription = "Add",
+                        modifier = Modifier.size(28.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text("Add file")
+                }
                 Box(
                     modifier = Modifier
                             .fillMaxWidth()
@@ -78,11 +94,6 @@ fun App(storage: Storage) {
                             .padding(16.dp),
                         horizontalAlignment = Alignment.Start
                     ) {
-                        Button(onClick = {
-                            filePicker.launch()
-                        }) {
-                            Text("Add file")
-                        }
                         Column(
                             modifier = Modifier.fillMaxWidth()
                         ) {
