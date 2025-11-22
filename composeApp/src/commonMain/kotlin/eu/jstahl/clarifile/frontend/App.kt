@@ -53,6 +53,11 @@ fun App(storage: Storage) {
     MaterialTheme {
         var searchName by remember { mutableStateOf("") }
         val selectedTags = remember { mutableStateListOf<String>() }
+        var selectedExtension by remember { mutableStateOf<String?>(null) }
+        var extensionDropdownExpanded by remember { mutableStateOf(false) }
+
+        val extensions by storage.getExtensions().collectAsState(initial = emptyList())
+
 
         Column(
             modifier = Modifier
@@ -91,16 +96,58 @@ fun App(storage: Storage) {
                         .padding(16.dp),
                     horizontalAlignment = Alignment.Start
                 ) {
-                    OutlinedTextField(
+                    Row(
                         modifier = Modifier.fillMaxWidth(),
-                        label = { Text("Name")},
-                        placeholder = { Text("Search for name") },
-                        value = searchName,
-                        singleLine = true,
-                        onValueChange = { value ->
-                            searchName = value
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedTextField(
+                            modifier = Modifier.weight(1f),
+                            label = { Text("Name")},
+                            placeholder = { Text("Search for name") },
+                            value = searchName,
+                            singleLine = true,
+                            onValueChange = { value ->
+                                searchName = value
+                            }
+                        )
+                        ExposedDropdownMenuBox(
+                            expanded = extensionDropdownExpanded,
+                            onExpandedChange = { extensionDropdownExpanded = it }
+                        ) {
+                            OutlinedTextField(
+                                modifier = Modifier
+                                    .menuAnchor()
+                                    .width(150.dp),
+                                value = selectedExtension ?: "All",
+                                onValueChange = {},
+                                readOnly = true,
+                                label = { Text("Extension") },
+                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = extensionDropdownExpanded) },
+                                colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+                            )
+                            ExposedDropdownMenu(
+                                expanded = extensionDropdownExpanded,
+                                onDismissRequest = { extensionDropdownExpanded = false }
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text("All") },
+                                    onClick = {
+                                        selectedExtension = null
+                                        extensionDropdownExpanded = false
+                                    }
+                                )
+                                extensions.forEach { ext ->
+                                    DropdownMenuItem(
+                                        text = { Text(ext) },
+                                        onClick = {
+                                            selectedExtension = ext
+                                            extensionDropdownExpanded = false
+                                        }
+                                    )
+                                }
+                            }
                         }
-                    )
+                    }
                     TagSelector(
                         storage,
                         selectedTags = selectedTags,
@@ -118,11 +165,12 @@ fun App(storage: Storage) {
                     .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.Start
             ) {
-                val files by remember(selectedTags.toList(), searchName) {
+                val files by remember(selectedTags.toList(), searchName, selectedExtension) {
                     storage.getFiles(FileRequest(
                         selectedTags,
                         LogicalOperator.And,
-                        searchName
+                        searchName,
+                        selectedExtension
                     )) }
                     .collectAsState(initial = emptyList())
 

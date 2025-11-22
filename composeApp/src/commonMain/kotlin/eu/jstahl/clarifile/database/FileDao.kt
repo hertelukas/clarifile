@@ -28,7 +28,10 @@ abstract class FileDao {
     @Query("SELECT id FROM files WHERE name LIKE '%' || :searchString || '%'")
     abstract fun searchFilesByName(searchString: String): Flow<List<Long>>
 
-    // 2. OR Logic: Files that match at least one tag
+    @Query("SELECT id FROM files WHERE name LIKE '%' || :searchString || '%' AND extension = :extension")
+    abstract fun searchFilesByNameAndExtension(searchString: String, extension: String): Flow<List<Long>>
+
+
     @Transaction
     @Query(
         """
@@ -44,6 +47,20 @@ abstract class FileDao {
     @Transaction
     @Query(
         """
+        SELECT DISTINCT f.id FROM files f
+        INNER JOIN file_tags ft ON f.id = ft.fileId
+        INNER JOIN tags t ON ft.tagId = t.id
+        WHERE t.content IN (:tags)
+        AND (f.name LIKE '%' || :searchString || '%')
+        AND f.extension = :extension
+    """
+    )
+    abstract fun getFilesByAnyTagAndExtension(searchString: String, tags: List<String>, extension: String): Flow<List<Long>>
+
+
+    @Transaction
+    @Query(
+        """
     SELECT f.id FROM files f
     INNER JOIN file_tags ft ON f.id = ft.fileId
     INNER JOIN tags t ON ft.tagId = t.id
@@ -54,6 +71,22 @@ abstract class FileDao {
 """
     )
     abstract fun getFilesByAllTags(searchString: String, tags: List<String>, tagCount: Int): Flow<List<Long>>
+
+    @Transaction
+    @Query(
+        """
+    SELECT f.id FROM files f
+    INNER JOIN file_tags ft ON f.id = ft.fileId
+    INNER JOIN tags t ON ft.tagId = t.id
+    WHERE t.content IN (:tags)
+    AND (f.name LIKE '%' || :searchString || '%')
+    AND f.extension = :extension
+    GROUP BY f.id
+    HAVING COUNT(DISTINCT t.content) = :tagCount
+"""
+    )
+    abstract fun getFilesByAllTagsAndExtension(searchString: String, tags: List<String>, tagCount: Int, extension: String): Flow<List<Long>>
+
 
     @Transaction
     @Query("SELECT f.name FROM files f WHERE id = :id")
@@ -101,4 +134,7 @@ abstract class FileDao {
 
     @Query("SELECT DISTINCT content FROM tags")
     abstract fun getDistinctTags(): Flow<List<String>>
+
+    @Query("SELECT DISTINCT extension FROM files WHERE extension != '' ORDER BY extension")
+    abstract fun getDistinctExtensions(): Flow<List<String>>
 }
