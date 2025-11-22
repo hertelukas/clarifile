@@ -5,6 +5,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -57,7 +58,7 @@ fun TagSelector(
         val showInlinePlaceholder = selectedTags.isEmpty() || tagInput.isNotEmpty()
 
         OutlinedTextField(
-            label = null,
+            label = { Text("Tags") },
             value = tagInput,
             onValueChange = { value ->
                 tagInput = value
@@ -104,7 +105,7 @@ fun TagSelector(
                         Spacer(modifier = Modifier.width(4.dp))
                     }
                 }
-            }
+            },
         )
 
         val filtered = if (tagInput.isBlank()) availableTags else availableTags.filter {

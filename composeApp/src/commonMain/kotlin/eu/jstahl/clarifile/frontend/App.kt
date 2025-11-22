@@ -50,6 +50,7 @@ fun App(storage: Storage) {
     }
 
     MaterialTheme {
+        var searchName by remember { mutableStateOf("") }
         val selectedTags = remember { mutableStateListOf<String>() }
 
         Scaffold(
@@ -97,7 +98,16 @@ fun App(storage: Storage) {
                         Column(
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            // Single text field tag selector with chips inside
+                            OutlinedTextField(
+                                modifier = Modifier.fillMaxWidth(),
+                                label = { Text("Name")},
+                                placeholder = { Text("Search for name") },
+                                value = searchName,
+                                singleLine = true,
+                                onValueChange = { value ->
+                                    searchName = value
+                                }
+                            )
                             TagSelector(
                                 storage,
                                 selectedTags = selectedTags,
@@ -117,7 +127,12 @@ fun App(storage: Storage) {
                         .verticalScroll(rememberScrollState()),
                     horizontalAlignment = Alignment.Start
                 ) {
-                    val files by remember(selectedTags.toList()) { storage.getFiles(FileRequest(selectedTags, LogicalOperator.And)) }
+                    val files by remember(selectedTags.toList(), searchName) {
+                        storage.getFiles(FileRequest(
+                            selectedTags,
+                            LogicalOperator.And,
+                            searchName
+                        )) }
                         .collectAsState(initial = emptyList())
 
                     for (file in files) {
