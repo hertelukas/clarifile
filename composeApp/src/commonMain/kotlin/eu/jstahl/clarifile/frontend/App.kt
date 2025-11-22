@@ -4,6 +4,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.WindowInsets
@@ -14,6 +15,8 @@ import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -54,41 +57,64 @@ fun App(storage: Storage) {
         }
     }
 
-    MaterialTheme {
+    val themeState = remember { ThemeState() }
+
+    AppTheme(themeState = themeState) {
         var searchName by remember { mutableStateOf("") }
         val selectedTags = remember { mutableStateListOf<String>() }
+
+        // Get system theme and current dark mode state
+        val systemInDarkTheme = isSystemInDarkTheme()
+        val isDarkMode = themeState.isDarkMode()
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
                 .statusBarsPadding()
                 .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom))
                 .padding(horizontal = ScreenHorizontalPadding, vertical = 16.dp),
             horizontalAlignment = Alignment.Start
         ) {
-            Button(
-                modifier = Modifier,
-                onClick = {
-                    filePicker.launch()
-                }
+            // Header row with Add file button and dark mode toggle
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = Icons.Filled.Add,
-                    contentDescription = "Add",
-                    modifier = Modifier.size(28.dp)
-                )
-                Spacer(Modifier.width(8.dp))
-                Text("Add file")
+                Button(
+                    onClick = {
+                        filePicker.launch()
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Add,
+                        contentDescription = "Add",
+                        modifier = Modifier.size(28.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text("Add file")
+                }
+
+                // Dark mode toggle
+                IconButton(
+                    onClick = { themeState.toggle(systemInDarkTheme) }
+                ) {
+                    val toggleIcon = if (isDarkMode) Icons.Filled.LightMode else Icons.Filled.DarkMode
+                    Icon(
+                        imageVector = toggleIcon,
+                        contentDescription = "Toggle dark mode",
+                        tint = MaterialTheme.colorScheme.onBackground
+                    )
+                }
             }
             Spacer(modifier = Modifier.height(16.dp))
-            Box(
+            Surface(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(
-                        color = MaterialTheme.colorScheme.primaryContainer,
-                        shape = RoundedCornerShape(12.dp)
-                    ),
+                    .fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                color = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
             ) {
                 Column(
                     modifier = Modifier
@@ -132,7 +158,7 @@ fun App(storage: Storage) {
                     .collectAsState(initial = emptyList())
 
                 for (file in files) {
-                    Box(
+                    Surface(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(12.dp))
