@@ -94,11 +94,9 @@ fun App(storage: Storage) {
                 IconButton(
                     onClick = { themeState.toggle(systemInDarkTheme) }
                 ) {
+                    val toggleIcon = if (isDarkMode) Icons.Filled.LightMode else Icons.Filled.DarkMode
                     Icon(
-                        imageVector = if (isDarkMode) 
-                            Icons.Filled.LightMode 
-                        else 
-                            Icons.Filled.DarkMode,
+                        imageVector = toggleIcon,
                         contentDescription = "Toggle dark mode"
                     )
                 }
