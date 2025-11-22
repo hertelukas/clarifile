@@ -37,6 +37,7 @@ import eu.jstahl.clarifile.backend.Storage
 import eu.jstahl.clarifile.backend.File
 import eu.jstahl.clarifile.utils.getStoragePath
 import io.github.vinceglb.filekit.compose.rememberFilePickerLauncher
+import io.github.vinceglb.filekit.core.PickerMode
 import io.github.vinceglb.filekit.core.PickerType
 import io.github.vinceglb.filekit.core.extension
 import kotlinx.coroutines.launch
@@ -49,11 +50,13 @@ fun App(storage: Storage) {
     val scope = rememberCoroutineScope()
     var editingFile by remember { mutableStateOf<File?>(null) }
     val filePicker = rememberFilePickerLauncher(
-        type = PickerType.File()
-    ) { file ->
-        file?.let {
-            scope.launch {
-                editingFile = storage.addFile(it.getStoragePath(), it.name, it.extension)
+        mode = PickerMode.Multiple()
+    ) { files ->
+        files?.let {
+            for (file in it) {
+                scope.launch {
+                    editingFile = storage.addFile(file.getStoragePath(), file.name, file.extension)
+                }
             }
         }
     }
