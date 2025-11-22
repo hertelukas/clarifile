@@ -150,11 +150,15 @@ fun App(storage: Storage) {
                             }
                             val fileTags by remember(file.getTags()) { file.getTags() }
                                 .collectAsState(initial = emptyList())
+                            val fileExtension by produceState(initialValue = "Loading...", file) {
+                                value = file.getExtension()
+                            }
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(fileName, modifier = Modifier.weight(1f))
+                                Text(".$fileExtension")
                                 IconButton(onClick = {
                                     editingFile = file
                                 }) {
