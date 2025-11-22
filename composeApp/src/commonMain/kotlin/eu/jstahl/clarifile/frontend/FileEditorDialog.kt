@@ -12,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import eu.jstahl.clarifile.backend.File
 import eu.jstahl.clarifile.backend.Storage
 
@@ -33,6 +34,7 @@ fun FileEditorDialog(
     val selectedTags = remember(fileTags) { mutableStateListOf<String>().apply { addAll(fileTags) } }
 
     AlertDialog(
+        modifier = Modifier.fillMaxWidth(0.9f),
         onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(onClick = {
@@ -62,6 +64,7 @@ fun FileEditorDialog(
                     allowFreeText = true,
                 )
             }
-        }
+        },
+        properties = DialogProperties(usePlatformDefaultWidth = false)
     )
 }
