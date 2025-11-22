@@ -64,8 +64,8 @@ class Storage(private val dao: FileDao, private val fileStorage: FileStorage) {
         return dao.getAllTags()
     }
 
-    fun getExtensions(): List<String> {
-        return listOf("pdf", "txt", "jpg")
+    fun getExtensions(): Flow<List<String>> {
+        return dao.getDistinctTags()
     }
 
     suspend fun autoTagLocation(file: File) {

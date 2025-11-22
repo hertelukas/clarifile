@@ -30,17 +30,20 @@ abstract class FileDao {
 
     // 2. OR Logic: Files that match at least one tag
     @Transaction
-    @Query("""
+    @Query(
+        """
         SELECT DISTINCT f.id FROM files f
         INNER JOIN file_tags ft ON f.id = ft.fileId
         INNER JOIN tags t ON ft.tagId = t.id
         WHERE t.content IN (:tags)
         AND (f.name LIKE '%' || :searchString || '%')
-    """)
+    """
+    )
     abstract fun getFilesByAnyTag(searchString: String, tags: List<String>): Flow<List<Long>>
 
     @Transaction
-    @Query("""
+    @Query(
+        """
     SELECT f.id FROM files f
     INNER JOIN file_tags ft ON f.id = ft.fileId
     INNER JOIN tags t ON ft.tagId = t.id
@@ -48,7 +51,8 @@ abstract class FileDao {
     AND (f.name LIKE '%' || :searchString || '%')
     GROUP BY f.id
     HAVING COUNT(DISTINCT t.content) = :tagCount
-""")
+"""
+    )
     abstract fun getFilesByAllTags(searchString: String, tags: List<String>, tagCount: Int): Flow<List<Long>>
 
     @Transaction
@@ -94,4 +98,7 @@ abstract class FileDao {
         // Note: Casting Long to Int because your Entities use Int IDs
         insertFileTagCrossRef(FileTag(fileId = fileId, tagId = tagId))
     }
+
+    @Query("SELECT DISTINCT content FROM tags")
+    abstract fun getDistinctTags(): Flow<List<String>>
 }
