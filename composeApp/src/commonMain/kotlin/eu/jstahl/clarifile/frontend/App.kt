@@ -27,6 +27,7 @@ import eu.jstahl.clarifile.backend.FileRequest
 import eu.jstahl.clarifile.backend.LogicalOperator
 import eu.jstahl.clarifile.backend.Storage
 import eu.jstahl.clarifile.backend.File
+import eu.jstahl.clarifile.utils.getStoragePath
 import io.github.vinceglb.filekit.compose.rememberFilePickerLauncher
 import io.github.vinceglb.filekit.core.PickerType
 import kotlinx.coroutines.launch
@@ -43,7 +44,7 @@ fun App(storage: Storage) {
     ) { file ->
         file?.let {
             scope.launch {
-                editingFile = storage.addFile(it.path!!)
+                editingFile = storage.addFile(it.getStoragePath())
             }
         }
     }

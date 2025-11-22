@@ -13,7 +13,7 @@ class Storage(private val dao: FileDao, private val fileStorage: FileStorage) {
         val id = dao.insertFile(FileEntity(name = path, extension = extension))
         fileStorage.saveFile(path, id)
 
-        return File(id, dao)
+        return File(id, dao, fileStorage)
     }
 
     fun getFiles(fileRequest: FileRequest): Flow<List<File>> {
@@ -29,7 +29,7 @@ class Storage(private val dao: FileDao, private val fileStorage: FileStorage) {
             else -> dao.getAllFiles() // Fallback
         }
 
-        return flow.map { files -> files.map { id -> File(id, dao) } }
+        return flow.map { files -> files.map { id -> File(id, dao, fileStorage) } }
     }
 
     fun getTags(): Flow<List<String>> {

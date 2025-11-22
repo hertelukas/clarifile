@@ -3,7 +3,7 @@ package eu.jstahl.clarifile.backend
 import eu.jstahl.clarifile.database.FileDao
 import kotlinx.coroutines.flow.Flow
 
-class File(private val id: Long, private val dao: FileDao) {
+class File(private val id: Long, private val dao: FileDao, private val fileStorage: FileStorage) {
 
     suspend fun setName(name: String) {
         return dao.updateNameByID(id, name)
@@ -28,5 +28,8 @@ class File(private val id: Long, private val dao: FileDao) {
     suspend fun setTags(tags: List<String>) {
         removeAllTags()
         tags.forEach { dao.addTagToFile(id, it) }
+    }
+
+    fun open() {
     }
 }
