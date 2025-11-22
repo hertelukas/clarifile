@@ -5,7 +5,8 @@ import androidx.room.*
 @Entity(tableName = "files")
 data class FileEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
-    val name: String
+    val name: String,
+    val extension: String
 )
 
 @Entity(tableName = "tags")

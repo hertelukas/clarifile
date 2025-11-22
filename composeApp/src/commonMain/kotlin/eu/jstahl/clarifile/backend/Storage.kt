@@ -3,9 +3,14 @@ package eu.jstahl.clarifile.backend
 import eu.jstahl.clarifile.database.FileDao
 import eu.jstahl.clarifile.database.FileEntity
 
-class Storage(private val dao: FileDao) {
+class Storage(private val dao: FileDao, private val fileStorage: FileStorage) {
+
     suspend fun addFile(path: String): File {
-        val id = dao.insertFile(FileEntity(name = path))
+        val extension = path.substringAfterLast(".", "")
+
+        val id = dao.insertFile(FileEntity(name = path, extension = extension))
+        fileStorage.saveFile(path, id)
+
         return File(id, dao)
     }
 
@@ -15,5 +20,9 @@ class Storage(private val dao: FileDao) {
 
     fun getTags(): List<String> {
         return listOf("a", "b", "c")
+    }
+
+    fun getExtensions(): List<String> {
+        return listOf("pdf", "txt", "jpg")
     }
 }

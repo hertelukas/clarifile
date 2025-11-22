@@ -18,7 +18,7 @@ fun main() = application {
 
     val dao = remember { database.fileDao() }
 
-    val storage = Storage(dao)
+    val storage = Storage(dao, DesktopFileStorage())
 
     Window(onCloseRequest = ::exitApplication, title = "Clarifile") {
         App(storage)
