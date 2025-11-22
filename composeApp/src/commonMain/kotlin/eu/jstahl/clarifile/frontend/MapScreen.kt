@@ -53,34 +53,28 @@ fun MapScreen(storage: Storage, onEditFile: (File) -> Unit) {
                 .clip(RoundedCornerShape(12.dp))
                 .background(Color(0xFFE3F2FD))
         ) {
+            // Get all files with GPS locations for display
+            val allFilesWithLocations by produceState<List<Pair<File, GeoLocation>>>(initialValue = emptyList()) {
+                val files = mutableListOf<File>()
+                storage.getFiles(eu.jstahl.clarifile.backend.FileRequest(emptyList(), eu.jstahl.clarifile.backend.LogicalOperator.And, ""))
+                    .collect { fileList ->
+                        files.clear()
+                        files.addAll(fileList)
+                    }
+                value = files.mapNotNull { file ->
+                    file.getGpsLocation()?.let { location -> file to location }
+                }
+            }
+            
             WorldMapCanvas(
                 modifier = Modifier.fillMaxSize(),
+                selectedLocation = selectedLocation,
+                fileLocations = allFilesWithLocations.map { it.second },
+                radiusKm = if (selectedLocation != null) radiusKm.toDouble() else null,
                 onLocationSelected = { location ->
                     selectedLocation = location
                 }
             )
-            
-            // Show selected location marker
-            selectedLocation?.let { location ->
-                // Convert lat/lon to canvas coordinates
-                val x = ((location.longitude + 180) / 360).toFloat()
-                val y = ((90 - location.latitude) / 180).toFloat()
-                
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(
-                            start = (x * 300.dp).coerceIn(0.dp, 300.dp),
-                            top = (y * 300.dp).coerceIn(0.dp, 300.dp)
-                        )
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(16.dp)
-                            .background(Color.Red, CircleShape)
-                    )
-                }
-            }
         }
         
         Spacer(modifier = Modifier.height(16.dp))
@@ -131,6 +125,9 @@ fun MapScreen(storage: Storage, onEditFile: (File) -> Unit) {
 @Composable
 fun WorldMapCanvas(
     modifier: Modifier = Modifier,
+    selectedLocation: GeoLocation?,
+    fileLocations: List<GeoLocation>,
+    radiusKm: Double?,
     onLocationSelected: (GeoLocation) -> Unit
 ) {
     Canvas(
@@ -184,6 +181,43 @@ fun WorldMapCanvas(
             end = Offset(size.width / 2, size.height),
             strokeWidth = 2f
         )
+        
+        // Draw file locations as small dots
+        fileLocations.forEach { location ->
+            val x = ((location.longitude + 180) / 360) * size.width
+            val y = ((90 - location.latitude) / 180) * size.height
+            
+            drawCircle(
+                color = Color.Blue,
+                radius = 4f,
+                center = Offset(x.toFloat(), y.toFloat())
+            )
+        }
+        
+        // Draw radius circle if location is selected
+        if (selectedLocation != null && radiusKm != null) {
+            val centerX = ((selectedLocation.longitude + 180) / 360) * size.width
+            val centerY = ((90 - selectedLocation.latitude) / 180) * size.height
+            
+            // Approximate radius in pixels (this is a rough approximation)
+            // At equator, 1 degree longitude ≈ 111 km
+            val radiusInDegrees = radiusKm / 111.0
+            val radiusInPixels = (radiusInDegrees / 360.0 * size.width).toFloat()
+            
+            // Draw radius circle
+            drawCircle(
+                color = Color.Red.copy(alpha = 0.2f),
+                radius = radiusInPixels,
+                center = Offset(centerX.toFloat(), centerY.toFloat())
+            )
+            
+            // Draw center marker
+            drawCircle(
+                color = Color.Red,
+                radius = 8f,
+                center = Offset(centerX.toFloat(), centerY.toFloat())
+            )
+        }
     }
 }
 
