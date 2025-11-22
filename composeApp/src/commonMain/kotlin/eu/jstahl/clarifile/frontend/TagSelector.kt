@@ -5,14 +5,12 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.PopupProperties
 import eu.jstahl.clarifile.backend.Storage
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -97,10 +95,11 @@ fun TagSelector(
                     // keep chips in a single row to honor singleLine
                 ) {
                     selectedTags.forEach { tag ->
-                        AssistChip(
-                            onClick = { onRemoveTag(tag) },
-                            label = { Text(tag) },
-                            trailingIcon = { Text("×") }
+                        LabelChip(
+                            text = tag,
+                            removable = true,
+                            onRemove = { onRemoveTag(tag) },
+                            onClick = { onRemoveTag(tag) }
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                     }
@@ -116,7 +115,6 @@ fun TagSelector(
         DropdownMenu(
             expanded = dropdownExpanded && (hasSuggestions || (allowFreeText && tagInput.isNotBlank())),
             onDismissRequest = { dropdownExpanded = false },
-            properties = PopupProperties(focusable = false),
         ) {
             if (!allowFreeText && availableTags.isEmpty()) {
                 DropdownMenuItem(
@@ -145,7 +143,13 @@ fun TagSelector(
             } else {
                 filtered.forEachIndexed { index, tag ->
                     DropdownMenuItem(
-                        text = { Text(tag) },
+                        text = {
+                            LabelChip(tag, onClick = {
+                                onAddTag(tag)
+                                tagInput = ""
+                                dropdownExpanded = false
+                            })
+                        },
                         onClick = {
                             onAddTag(tag)
                             tagInput = ""

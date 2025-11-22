@@ -21,7 +21,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import eu.jstahl.clarifile.backend.FileRequest
@@ -175,16 +174,7 @@ fun App(storage: Storage) {
                                         verticalArrangement = Arrangement.spacedBy(8.dp)
                                     ) {
                                         fileTags.forEach { tag ->
-                                            val bg = colorForTag(tag)
-                                            val fg = contentColorFor(bg)
-                                            AssistChip(
-                                                onClick = {},
-                                                label = { Text(tag) },
-                                                colors = AssistChipDefaults.assistChipColors(
-                                                    containerColor = bg,
-                                                    labelColor = fg
-                                                )
-                                            )
+                                            LabelChip(text = tag)
                                         }
                                     }
                                 }
@@ -211,32 +201,4 @@ fun App(storage: Storage) {
             }
         }
     }
-}
-
-// Let's ignore weird AI slob as it's just for generating colors :)
-private fun colorForTag(name: String): Color {
-    fun fnv1a32(input: String): UInt {
-        var hash = 2166136261u // FNV offset basis
-        val prime = 16777619u  // FNV prime
-        for (ch in input) {
-            hash = hash xor ch.code.toUInt()
-            hash *= prime
-        }
-        return hash
-    }
-
-    val normalized = name.trim().lowercase()
-    val h = fnv1a32(normalized)
-
-    val hue = (h and 0xFFFFu).toInt() % 360
-    val satByte = ((h shr 16) and 0xFFu).toInt()
-    val valByte = ((h shr 24) and 0xFFu).toInt()
-    val saturation = 0.45f + (satByte / 255f) * 0.4f
-    val value = 0.65f + (valByte / 255f) * 0.3f
-
-    return Color.hsv(hue.toFloat(), saturation, value)
-}
-
-private fun contentColorFor(background: Color): Color {
-    return if (background.luminance() < 0.5f) Color.White else Color.Black
 }
