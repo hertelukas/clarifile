@@ -46,23 +46,14 @@ class Storage(private val dao: FileDao, private val fileStorage: FileStorage) {
 
     fun getFiles(fileRequest: FileRequest): Flow<List<File>> {
         val flow: Flow<List<Long>> = when {
-            fileRequest.tags.isEmpty() && fileRequest.extension == null -> 
-                dao.searchFilesByName(fileRequest.searchString)
-            
-            fileRequest.tags.isEmpty() && fileRequest.extension != null ->
-                dao.searchFilesByNameAndExtension(fileRequest.searchString, fileRequest.extension)
+            fileRequest.tags.isEmpty() -> 
+                dao.searchFilesByName(fileRequest.searchString, fileRequest.extension)
 
-            fileRequest.tagOperator == LogicalOperator.Or && fileRequest.extension == null ->
-                dao.getFilesByAnyTag(fileRequest.searchString, fileRequest.tags)
-            
-            fileRequest.tagOperator == LogicalOperator.Or && fileRequest.extension != null ->
-                dao.getFilesByAnyTagAndExtension(fileRequest.searchString, fileRequest.tags, fileRequest.extension)
+            fileRequest.tagOperator == LogicalOperator.Or ->
+                dao.getFilesByAnyTag(fileRequest.searchString, fileRequest.tags, fileRequest.extension)
 
-            fileRequest.tagOperator == LogicalOperator.And && fileRequest.extension == null ->
-                dao.getFilesByAllTags(fileRequest.searchString, fileRequest.tags, fileRequest.tags.size)
-            
-            fileRequest.tagOperator == LogicalOperator.And && fileRequest.extension != null ->
-                dao.getFilesByAllTagsAndExtension(fileRequest.searchString, fileRequest.tags, fileRequest.tags.size, fileRequest.extension)
+            fileRequest.tagOperator == LogicalOperator.And ->
+                dao.getFilesByAllTags(fileRequest.searchString, fileRequest.tags, fileRequest.tags.size, fileRequest.extension)
 
             else -> dao.getAllFiles() // Fallback
         }

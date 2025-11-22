@@ -25,12 +25,8 @@ abstract class FileDao {
     @Query("SELECT content FROM tags")
     abstract fun getAllTags(): Flow<List<String>>
 
-    @Query("SELECT id FROM files WHERE name LIKE '%' || :searchString || '%'")
-    abstract fun searchFilesByName(searchString: String): Flow<List<Long>>
-
-    @Query("SELECT id FROM files WHERE name LIKE '%' || :searchString || '%' AND extension = :extension")
-    abstract fun searchFilesByNameAndExtension(searchString: String, extension: String): Flow<List<Long>>
-
+    @Query("SELECT id FROM files WHERE name LIKE '%' || :searchString || '%' AND (:extension IS NULL OR extension = :extension)")
+    abstract fun searchFilesByName(searchString: String, extension: String? = null): Flow<List<Long>>
 
     @Transaction
     @Query(
@@ -40,23 +36,10 @@ abstract class FileDao {
         INNER JOIN tags t ON ft.tagId = t.id
         WHERE t.content IN (:tags)
         AND (f.name LIKE '%' || :searchString || '%')
+        AND (:extension IS NULL OR f.extension = :extension)
     """
     )
-    abstract fun getFilesByAnyTag(searchString: String, tags: List<String>): Flow<List<Long>>
-
-    @Transaction
-    @Query(
-        """
-        SELECT DISTINCT f.id FROM files f
-        INNER JOIN file_tags ft ON f.id = ft.fileId
-        INNER JOIN tags t ON ft.tagId = t.id
-        WHERE t.content IN (:tags)
-        AND (f.name LIKE '%' || :searchString || '%')
-        AND f.extension = :extension
-    """
-    )
-    abstract fun getFilesByAnyTagAndExtension(searchString: String, tags: List<String>, extension: String): Flow<List<Long>>
-
+    abstract fun getFilesByAnyTag(searchString: String, tags: List<String>, extension: String? = null): Flow<List<Long>>
 
     @Transaction
     @Query(
@@ -66,26 +49,12 @@ abstract class FileDao {
     INNER JOIN tags t ON ft.tagId = t.id
     WHERE t.content IN (:tags)
     AND (f.name LIKE '%' || :searchString || '%')
+    AND (:extension IS NULL OR f.extension = :extension)
     GROUP BY f.id
     HAVING COUNT(DISTINCT t.content) = :tagCount
 """
     )
-    abstract fun getFilesByAllTags(searchString: String, tags: List<String>, tagCount: Int): Flow<List<Long>>
-
-    @Transaction
-    @Query(
-        """
-    SELECT f.id FROM files f
-    INNER JOIN file_tags ft ON f.id = ft.fileId
-    INNER JOIN tags t ON ft.tagId = t.id
-    WHERE t.content IN (:tags)
-    AND (f.name LIKE '%' || :searchString || '%')
-    AND f.extension = :extension
-    GROUP BY f.id
-    HAVING COUNT(DISTINCT t.content) = :tagCount
-"""
-    )
-    abstract fun getFilesByAllTagsAndExtension(searchString: String, tags: List<String>, tagCount: Int, extension: String): Flow<List<Long>>
+    abstract fun getFilesByAllTags(searchString: String, tags: List<String>, tagCount: Int, extension: String? = null): Flow<List<Long>>
 
 
     @Transaction
