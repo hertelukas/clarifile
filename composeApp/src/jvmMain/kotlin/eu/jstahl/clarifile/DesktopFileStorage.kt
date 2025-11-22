@@ -3,6 +3,8 @@ package eu.jstahl.clarifile
 import eu.jstahl.clarifile.backend.FileStorage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.awt.Desktop
+import java.io.File
 import java.io.FileNotFoundException
 import java.nio.file.*
 import kotlin.io.path.*
@@ -44,4 +46,16 @@ class DesktopFileStorage : FileStorage {
                 .map { it.toAbsolutePath().toString() }
                 .orElseThrow { FileNotFoundException("No file found for ID $id") }
         }
-    }}
+    }
+
+    override fun open(id: Long) {
+        try {
+            val path = getAbsolutePath(id)
+            if (Desktop.isDesktopSupported()) {
+                Desktop.getDesktop().open(File(path))
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+}

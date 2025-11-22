@@ -1,8 +1,11 @@
 package eu.jstahl.clarifile
 
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.provider.OpenableColumns
+import android.webkit.MimeTypeMap
+import androidx.core.content.FileProvider
 import eu.jstahl.clarifile.backend.FileStorage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -56,6 +59,33 @@ class AndroidFileStorage(private val context: Context) : FileStorage {
             ?: throw FileNotFoundException("No file found for ID $id")
 
         return firstFile.absolutePath
+    }
+
+    override fun open(id: Long) {
+        try {
+            val file = File(getAbsolutePath(id))
+
+            // Generate a content:// URI that grants temporary access
+            val uri = FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.provider", // Must match Manifest authorities
+                file
+            )
+
+            val intent = Intent(Intent.ACTION_VIEW).apply {
+                setDataAndType(uri, getMimeType(file))
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(intent)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun getMimeType(file: File): String {
+        val ext = file.extension.lowercase()
+        return MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext) ?: "*/*"
     }
 
     // Helper to extract the real filename (e.g. "document.pdf") from a Content URI

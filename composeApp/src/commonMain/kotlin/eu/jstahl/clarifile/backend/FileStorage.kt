@@ -6,4 +6,6 @@ interface FileStorage {
 
     // To read it back later
     fun getAbsolutePath(id: Long): String
+
+    fun open(id: Long)
 }
