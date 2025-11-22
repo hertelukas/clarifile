@@ -24,6 +24,16 @@ enum class ThemeMode {
 
 class ThemeState {
     var themeMode by mutableStateOf(ThemeMode.SYSTEM)
+    
+    @Composable
+    fun isDarkMode(): Boolean {
+        val systemInDarkTheme = isSystemInDarkTheme()
+        return when (themeMode) {
+            ThemeMode.LIGHT -> false
+            ThemeMode.DARK -> true
+            ThemeMode.SYSTEM -> systemInDarkTheme
+        }
+    }
 }
 
 @Composable
@@ -31,13 +41,7 @@ fun AppTheme(
     themeState: ThemeState = remember { ThemeState() },
     content: @Composable () -> Unit
 ) {
-    val systemInDarkTheme = isSystemInDarkTheme()
-    val isDarkMode = when (themeState.themeMode) {
-        ThemeMode.LIGHT -> false
-        ThemeMode.DARK -> true
-        ThemeMode.SYSTEM -> systemInDarkTheme
-    }
-
+    val isDarkMode = themeState.isDarkMode()
     val colorScheme = if (isDarkMode) DarkColorScheme else LightColorScheme
 
     MaterialTheme(
