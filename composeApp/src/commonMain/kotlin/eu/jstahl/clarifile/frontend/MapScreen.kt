@@ -2,14 +2,11 @@ package eu.jstahl.clarifile.frontend
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,12 +21,24 @@ import eu.jstahl.clarifile.backend.GeoLocation
 import eu.jstahl.clarifile.backend.Storage
 import kotlin.math.*
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapScreen(storage: Storage, onEditFile: (File) -> Unit) {
     var selectedLocation by remember { mutableStateOf<GeoLocation?>(null) }
     var radiusKm by remember { mutableStateOf(50f) }
-    val scope = rememberCoroutineScope()
+    
+    // Collect all files with GPS locations once
+    val allFilesWithLocations by produceState<List<Pair<File, GeoLocation>>>(initialValue = emptyList()) {
+        val files = mutableListOf<File>()
+        storage.getFiles(eu.jstahl.clarifile.backend.FileRequest(emptyList(), eu.jstahl.clarifile.backend.LogicalOperator.And, ""))
+            .collect { fileList ->
+                files.clear()
+                files.addAll(fileList)
+            }
+        value = files.mapNotNull { file ->
+            file.getGpsLocation()?.let { location -> file to location }
+        }
+    }
     
     Column(
         modifier = Modifier
@@ -51,19 +60,6 @@ fun MapScreen(storage: Storage, onEditFile: (File) -> Unit) {
                 .clip(RoundedCornerShape(12.dp))
                 .background(Color(0xFFE3F2FD))
         ) {
-            // Get all files with GPS locations for display
-            val allFilesWithLocations by produceState<List<Pair<File, GeoLocation>>>(initialValue = emptyList()) {
-                val files = mutableListOf<File>()
-                storage.getFiles(eu.jstahl.clarifile.backend.FileRequest(emptyList(), eu.jstahl.clarifile.backend.LogicalOperator.And, ""))
-                    .collect { fileList ->
-                        files.clear()
-                        files.addAll(fileList)
-                    }
-                value = files.mapNotNull { file ->
-                    file.getGpsLocation()?.let { location -> file to location }
-                }
-            }
-            
             WorldMapCanvas(
                 modifier = Modifier.fillMaxSize(),
                 selectedLocation = selectedLocation,
@@ -94,8 +90,10 @@ fun MapScreen(storage: Storage, onEditFile: (File) -> Unit) {
         
         // Display files in selected area
         selectedLocation?.let { location ->
-            val filesInArea by produceState<List<File>>(initialValue = emptyList(), location, radiusKm) {
-                value = getFilesInRadius(storage, location, radiusKm.toDouble())
+            val filesInArea = remember(location, radiusKm, allFilesWithLocations) {
+                allFilesWithLocations.filter { (_, fileLocation) ->
+                    calculateDistance(location, fileLocation) <= radiusKm.toDouble()
+                }.map { it.first }
             }
             
             Text(
@@ -197,8 +195,10 @@ fun WorldMapCanvas(
             val centerX = ((selectedLocation.longitude + 180) / 360) * size.width
             val centerY = ((90 - selectedLocation.latitude) / 180) * size.height
             
-            // Approximate radius in pixels (this is a rough approximation)
-            // At equator, 1 degree longitude ≈ 111 km
+            // NOTE: This is a simplified approximation for visualization purposes.
+            // The circle appears more distorted at higher latitudes due to the Mercator-like
+            // projection. The actual distance calculation (Haversine) remains accurate.
+            // At equator: 1 degree longitude ≈ 111 km
             val radiusInDegrees = radiusKm / 111.0
             val radiusInPixels = (radiusInDegrees / 360.0 * size.width).toFloat()
             
@@ -216,81 +216,6 @@ fun WorldMapCanvas(
                 center = Offset(centerX.toFloat(), centerY.toFloat())
             )
         }
-    }
-}
-
-@Composable
-private fun FileListItem(file: File, onEdit: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(
-                color = Color.LightGray,
-                shape = RoundedCornerShape(12.dp)
-            )
-            .clickable {
-                file.open()
-            },
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.Start
-        ) {
-            val fileName by produceState(initialValue = "Loading...", file) {
-                value = file.getName()
-            }
-            val fileTags by remember(file.getTags()) { file.getTags() }
-                .collectAsState(initial = emptyList())
-            val fileExtension by produceState(initialValue = "Loading...", file) {
-                value = file.getExtension()
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(fileName, modifier = Modifier.weight(1f))
-                Text(".$fileExtension")
-                IconButton(onClick = onEdit) {
-                    Icon(Icons.Filled.Edit, contentDescription = "Edit")
-                }
-            }
-            if (fileTags.isNotEmpty()) {
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    fileTags.forEach { tag ->
-                        LabelChip(text = tag)
-                    }
-                }
-            }
-        }
-    }
-}
-
-/**
- * Retrieves all files from storage and filters them by distance from the center point
- */
-private suspend fun getFilesInRadius(
-    storage: Storage,
-    center: GeoLocation,
-    radiusKm: Double
-): List<File> {
-    // Get all files (we'll filter by location)
-    val allFiles = mutableListOf<File>()
-    storage.getFiles(eu.jstahl.clarifile.backend.FileRequest(emptyList(), eu.jstahl.clarifile.backend.LogicalOperator.And, ""))
-        .collect { files ->
-            allFiles.clear()
-            allFiles.addAll(files)
-        }
-    
-    // Filter files by distance
-    return allFiles.filter { file ->
-        val location = file.getGpsLocation()
-        location != null && calculateDistance(center, location) <= radiusKm
     }
 }
 

@@ -1,20 +1,17 @@
 package eu.jstahl.clarifile.frontend
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import eu.jstahl.clarifile.backend.File
 import eu.jstahl.clarifile.backend.FileRequest
@@ -25,7 +22,7 @@ import io.github.vinceglb.filekit.compose.rememberFilePickerLauncher
 import io.github.vinceglb.filekit.core.PickerType
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FilesScreen(storage: Storage, onEditFile: (File) -> Unit) {
     val scope = rememberCoroutineScope()
@@ -114,56 +111,10 @@ fun FilesScreen(storage: Storage, onEditFile: (File) -> Unit) {
                 .collectAsState(initial = emptyList())
 
             for (file in files) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(
-                            color = Color.LightGray,
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                        .clickable {
-                            file.open()
-                        },
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalAlignment = Alignment.Start
-                    ) {
-                        val fileName by produceState(initialValue = "Loading...", file) {
-                            value = file.getName()
-                        }
-                        val fileTags by remember(file.getTags()) { file.getTags() }
-                            .collectAsState(initial = emptyList())
-                        val fileExtension by produceState(initialValue = "Loading...", file) {
-                            value = file.getExtension()
-                        }
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(fileName, modifier = Modifier.weight(1f))
-                            Text(".$fileExtension")
-                            IconButton(onClick = {
-                                onEditFile(file)
-                            }) {
-                                Icon(Icons.Filled.Edit, contentDescription = "Edit")
-                            }
-                        }
-                        if (fileTags.isNotEmpty()) {
-                            FlowRow(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                fileTags.forEach { tag ->
-                                    LabelChip(text = tag)
-                                }
-                            }
-                        }
-                    }
-                }
+                FileListItem(
+                    file = file,
+                    onEdit = { onEditFile(file) }
+                )
                 Spacer(modifier = Modifier.height(16.dp))
             }
         }
