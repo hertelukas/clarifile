@@ -134,7 +134,7 @@ fun App(storage: Storage) {
                     ) {
                         OutlinedTextField(
                             modifier = Modifier.weight(1f),
-                            label = { Text("Name")},
+                            label = { Text("Name") },
                             placeholder = { Text("Search for name") },
                             value = searchName,
                             singleLine = true,
@@ -198,26 +198,27 @@ fun App(storage: Storage) {
                 horizontalAlignment = Alignment.Start
             ) {
                 val files by remember(selectedTags.toList(), searchName, selectedExtension) {
-                    storage.getFiles(FileRequest(
-                        selectedTags,
-                        LogicalOperator.And,
-                        searchName,
-                        selectedExtension
-                    )) }
+                    storage.getFiles(
+                        FileRequest(
+                            selectedTags,
+                            LogicalOperator.And,
+                            searchName,
+                            selectedExtension
+                        )
+                    )
+                }
                     .collectAsState(initial = emptyList())
 
                 for (file in files) {
                     Surface(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(
-                                color = Color.LightGray,
-                                shape = RoundedCornerShape(12.dp)
-                            )
                             .clickable {
                                 file.open()
                             },
+                        shape = RoundedCornerShape(12.dp),
+                        color = MaterialTheme.colorScheme.secondaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                     ) {
                         Column(
                             modifier = Modifier
