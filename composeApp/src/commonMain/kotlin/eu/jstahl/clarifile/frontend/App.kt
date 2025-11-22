@@ -55,12 +55,14 @@ fun App(storage: Storage) {
         val selectedTags = remember { mutableStateListOf<String>() }
 
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .safeContentPadding()
+                .padding(horizontal = ScreenHorizontalPadding, vertical = 16.dp),
             horizontalAlignment = Alignment.Start
         ) {
             Button(
-                modifier = Modifier
-                        .padding(16.dp),
+                modifier = Modifier,
                 onClick = {
                     filePicker.launch()
                 }
@@ -73,16 +75,15 @@ fun App(storage: Storage) {
                 Spacer(Modifier.width(8.dp))
                 Text("Add file")
             }
+            Spacer(modifier = Modifier.height(16.dp))
             Box(
                 modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                        .safeContentPadding()
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(
-                            color = MaterialTheme.colorScheme.primaryContainer,
-                            shape = RoundedCornerShape(12.dp)
-                        ),
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        shape = RoundedCornerShape(12.dp)
+                    ),
             ) {
                 Column(
                     modifier = Modifier
@@ -112,13 +113,12 @@ fun App(storage: Storage) {
                     }
                 }
             }
+            Spacer(modifier = Modifier.height(16.dp))
 
             Column(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
-                    .padding(16.dp)
-                    .safeContentPadding()
                     .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.Start
             ) {
@@ -134,7 +134,6 @@ fun App(storage: Storage) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .safeContentPadding()
                             .clip(RoundedCornerShape(12.dp))
                             .background(
                                 color = Color.LightGray,
@@ -147,8 +146,7 @@ fun App(storage: Storage) {
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(16.dp)
-                                .safeContentPadding(),
+                                .padding(16.dp),
                             horizontalAlignment = Alignment.Start
                         ) {
                             val fileName by produceState(initialValue = "Loading...", file) {
@@ -179,7 +177,7 @@ fun App(storage: Storage) {
                             }
                         }
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
 
                 if (editingFile != null) {
