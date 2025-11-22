@@ -56,6 +56,10 @@ abstract class FileDao {
     abstract suspend fun getFileNameByID(id: Long): String
 
     @Transaction
+    @Query("SELECT f.extension FROM files f WHERE id = :id")
+    abstract suspend fun getFileExtensionByID(id: Long): String
+
+    @Transaction
     @Query("UPDATE files SET name = :newName WHERE id = :id")
     abstract suspend fun updateNameByID(id: Long, newName: String)
 
