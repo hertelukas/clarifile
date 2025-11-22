@@ -131,7 +131,7 @@ fun App(storage: Storage) {
                                 val fileName by produceState(initialValue = "Loading...", file) {
                                     value = file.getName()
                                 }
-                                val fileTags by remember { file.getTags() }
+                                val fileTags by remember(file.getTags()) { file.getTags() }
                                     .collectAsState(initial = emptyList())
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
