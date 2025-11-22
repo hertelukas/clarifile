@@ -1,18 +1,18 @@
 package eu.jstahl.clarifile.frontend
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import eu.jstahl.clarifile.backend.Storage
+import io.github.vinceglb.filekit.compose.rememberFilePickerLauncher
+import io.github.vinceglb.filekit.core.PickerType
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -20,11 +20,20 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @Composable
 @Preview
 fun App(storage: Storage) {
+    val scope = rememberCoroutineScope()
+    val filePicker = rememberFilePickerLauncher(
+        type = PickerType.File()
+    ) { file ->
+        file?.let {
+            scope.launch {
+                storage.addFile(it.path!!)
+            }
+        }
+    }
 
     MaterialTheme {
         val selectedTags = remember { mutableStateListOf<String>() }
 
-        val scope = rememberCoroutineScope()
 
         Scaffold(
             topBar = {
@@ -41,15 +50,15 @@ fun App(storage: Storage) {
                 horizontalAlignment = Alignment.Start,
             ) {
                 Button(onClick = {
-                    scope.launch {
-                        storage.addFile("~/geheimedokumente.txb")
-                    }
+                    filePicker.launch()
                 }) {
                     Text("Add file")
                 }
-                Column(modifier =
-                    Modifier.padding(16.dp)
-                        .fillMaxWidth()) {
+                Column(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                ) {
                     // Single text field tag selector with chips inside
                     TagSelector(
                         storage,
