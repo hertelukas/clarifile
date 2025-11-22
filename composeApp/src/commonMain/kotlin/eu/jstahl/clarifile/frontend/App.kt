@@ -91,26 +91,22 @@ fun App(storage: Storage) {
                         .padding(16.dp),
                     horizontalAlignment = Alignment.Start
                 ) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        OutlinedTextField(
-                            modifier = Modifier.fillMaxWidth(),
-                            label = { Text("Name")},
-                            placeholder = { Text("Search for name") },
-                            value = searchName,
-                            singleLine = true,
-                            onValueChange = { value ->
-                                searchName = value
-                            }
-                        )
-                        TagSelector(
-                            storage,
-                            selectedTags = selectedTags,
-                            onAddTag = { tag -> if (tag !in selectedTags) selectedTags.add(tag) },
-                            onRemoveTag = { tag -> selectedTags.remove(tag) },
-                        )
-                    }
+                    OutlinedTextField(
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text("Name")},
+                        placeholder = { Text("Search for name") },
+                        value = searchName,
+                        singleLine = true,
+                        onValueChange = { value ->
+                            searchName = value
+                        }
+                    )
+                    TagSelector(
+                        storage,
+                        selectedTags = selectedTags,
+                        onAddTag = { tag -> if (tag !in selectedTags) selectedTags.add(tag) },
+                        onRemoveTag = { tag -> selectedTags.remove(tag) },
+                    )
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
