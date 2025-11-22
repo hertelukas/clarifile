@@ -9,6 +9,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import eu.jstahl.clarifile.backend.Storage
 import io.github.vinceglb.filekit.compose.rememberFilePickerLauncher
@@ -41,33 +42,48 @@ fun App(storage: Storage) {
             }
         ) { paddingValues ->
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
-                    .background(MaterialTheme.colorScheme.surface)
-                    .safeContentPadding()
+                modifier = Modifier.fillMaxSize()
                     .padding(paddingValues),
-                horizontalAlignment = Alignment.Start,
+                horizontalAlignment = Alignment.Start
             ) {
-                Button(onClick = {
-                    filePicker.launch()
-                }) {
-                    Text("Add file")
-                }
-                Column(
-                    modifier =
-                        Modifier
+                Box(
+                    modifier = Modifier
                             .fillMaxWidth()
+                            .padding(16.dp)
+                            .safeContentPadding(),
                 ) {
-                    // Single text field tag selector with chips inside
-                    TagSelector(
-                        storage,
-                        selectedTags = selectedTags,
-                        onAddTag = { tag -> if (tag !in selectedTags) selectedTags.add(tag) },
-                        onRemoveTag = { tag -> selectedTags.remove(tag) }
-                    )
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.Start
+                    ) {
+                        Button(onClick = {
+                            filePicker.launch()
+                        }) {
+                            Text("Add file")
+                        }
+                        Column(
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            // Single text field tag selector with chips inside
+                            TagSelector(
+                                storage,
+                                selectedTags = selectedTags,
+                                onAddTag = { tag -> if (tag !in selectedTags) selectedTags.add(tag) },
+                                onRemoveTag = { tag -> selectedTags.remove(tag) }
+                            )
+                        }
+                    }
                 }
-                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                        .safeContentPadding(),
+                    horizontalAlignment = Alignment.Start
+                ) {
+                    Text("Selected tags: ${selectedTags.joinToString(", ")}")
+                }
             }
         }
     }
