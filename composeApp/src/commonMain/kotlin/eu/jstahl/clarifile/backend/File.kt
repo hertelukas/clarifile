@@ -6,8 +6,8 @@ class File(private val id: Long, private val dao: FileDao) {
 
     fun setName(name: String) {}
 
-    fun getName(): String {
-        return ""
+    suspend fun getName(): String {
+        return dao.getFileNameByID(id)
     }
 
     fun getTags(): List<String> {

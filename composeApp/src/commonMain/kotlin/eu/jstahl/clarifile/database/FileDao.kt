@@ -25,4 +25,37 @@ interface FileDao {
     @Transaction
     @Query("SELECT * FROM files WHERE id = :id")
     suspend fun getFileWithTags(id: Int): FileWithTags?
+
+    @Transaction
+    @Query("SELECT id FROM files")
+    fun getAllFiles(): Flow<List<Long>>
+
+    // 2. OR Logic: Files that match at least one tag
+    @Transaction
+    @Query("""
+        SELECT DISTINCT f.id FROM files f
+        INNER JOIN file_tags ft ON f.id = ft.fileId
+        INNER JOIN tags t ON ft.tagId = t.id
+        WHERE t.content IN (:tags)
+    """)
+    fun getFilesByAnyTag(tags: List<String>): Flow<List<Long>>
+
+    // 3. AND Logic: Files that have ALL specified tags
+    // We filter for files containing the tags, group by file,
+    // and ensure the count of matches equals the number of requested tags.
+    @Transaction
+    @Query("""
+        SELECT f.id FROM files f
+        INNER JOIN file_tags ft ON f.id = ft.fileId
+        INNER JOIN tags t ON ft.tagId = t.id
+        WHERE t.content IN (:tags)
+        GROUP BY f.id
+        HAVING COUNT(DISTINCT t.content) = :tagCount
+    """)
+    fun getFilesByAllTags(tags: List<String>, tagCount: Int): Flow<List<Long>>
+
+    @Transaction
+    @Query("SELECT f.name FROM files f WHERE id = :id")
+    suspend fun getFileNameByID(id: Long): String
+
 }
