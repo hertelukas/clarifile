@@ -17,5 +17,7 @@ class File(private val id: Long, private val dao: FileDao) {
         return dao.getFileTags(id)
     }
 
-    fun addTag(tag: String) {}
+    suspend fun addTag(tag: String) {
+        dao.addTagToFile(id, tag)
+    }
 }

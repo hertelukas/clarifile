@@ -4,14 +4,14 @@ import androidx.room.*
 
 @Entity(tableName = "files")
 data class FileEntity(
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val name: String,
     val extension: String
 )
 
 @Entity(tableName = "tags")
 data class TagEntity(
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val content: String
 )
 
@@ -25,8 +25,8 @@ data class TagEntity(
     indices = [Index("fileId"), Index("tagId")] // Indexing is critical for join performance
 )
 data class FileTag(
-    val fileId: Int,
-    val tagId: Int
+    val fileId: Long,
+    val tagId: Long
 )
 
 data class FileWithTags(
