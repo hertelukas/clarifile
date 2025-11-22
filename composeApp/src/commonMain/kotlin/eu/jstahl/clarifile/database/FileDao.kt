@@ -58,4 +58,7 @@ interface FileDao {
     @Query("SELECT f.name FROM files f WHERE id = :id")
     suspend fun getFileNameByID(id: Long): String
 
+    @Transaction
+    @Query("UPDATE files SET name = :newName WHERE id = :id")
+    suspend fun updateNameByID(id: Long, name: String)
 }

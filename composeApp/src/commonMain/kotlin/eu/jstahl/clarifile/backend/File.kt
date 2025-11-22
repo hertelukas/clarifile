@@ -4,7 +4,9 @@ import eu.jstahl.clarifile.database.FileDao
 
 class File(private val id: Long, private val dao: FileDao) {
 
-    fun setName(name: String) {}
+    suspend fun setName(name: String) {
+        return dao.updateNameByID(id, name)
+    }
 
     suspend fun getName(): String {
         return dao.getFileNameByID(id)

@@ -16,7 +16,7 @@ class Storage(private val dao: FileDao, private val fileStorage: FileStorage) {
         return File(id, dao)
     }
 
-    suspend fun getFiles(fileRequest: FileRequest): Flow<List<File>> {
+    fun getFiles(fileRequest: FileRequest): Flow<List<File>> {
         val flow: Flow<List<Long>> = when {
             fileRequest.tags.isEmpty() -> dao.getAllFiles()
 
