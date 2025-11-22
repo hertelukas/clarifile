@@ -59,9 +59,10 @@ fun App(storage: Storage) {
         var searchName by remember { mutableStateOf("") }
         val selectedTags = remember { mutableStateListOf<String>() }
         
-        // Get current dark mode state for icon display and toggle logic
-        val systemInDarkTheme = isSystemInDarkTheme()
+        // Get current dark mode state for icon display
         val isDarkMode = themeState.isDarkMode()
+        // Need system theme for toggle logic when in SYSTEM mode
+        val systemInDarkTheme = isSystemInDarkTheme()
 
         Column(
             modifier = Modifier
