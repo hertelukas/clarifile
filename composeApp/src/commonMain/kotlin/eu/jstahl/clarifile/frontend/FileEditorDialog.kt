@@ -3,36 +3,34 @@ package eu.jstahl.clarifile.frontend
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import eu.jstahl.clarifile.backend.File
 import eu.jstahl.clarifile.backend.Storage
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun FileEditorDialog(
     storage: Storage,
-    initialName: String,
-    initialTagsInput: String,
+    file: File,
     onConfirm: (String, List<String>) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    var name by remember { mutableStateOf(initialName) }
-
-    fun parseTags(input: String): List<String> {
-        if (input.isBlank()) return emptyList()
-        val separators = arrayOf(",", ";", "\n", "\t", " ")
-        return input
-            .split(*separators)
-            .map { it.trim().replace(" ", "") }
-            .filter { it.isNotEmpty() }
-            .distinct()
+    val fileName by produceState(initialValue = "Loading...", file) {
+        value = file.getName()
     }
-    val selectedTags = remember { mutableStateListOf<String>().apply { addAll(parseTags(initialTagsInput)) } }
+    val fileTags by remember { file.getTags() }
+        .collectAsState(initial = emptyList())
+
+    var name by remember(fileName) { mutableStateOf(fileName) }
+    val selectedTags = remember(fileTags) { mutableStateListOf<String>().apply { addAll(fileTags) } }
 
     AlertDialog(
         onDismissRequest = onDismiss,

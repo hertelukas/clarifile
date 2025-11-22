@@ -17,6 +17,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,6 +35,8 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupProperties
+import eu.jstahl.clarifile.backend.FileRequest
+import eu.jstahl.clarifile.backend.LogicalOperator
 import eu.jstahl.clarifile.backend.Storage
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -48,8 +51,11 @@ fun TagSelector(
     var dropdownExpanded by remember { mutableStateOf(false) }
     var tagInput by remember { mutableStateOf("") }
 
-    val availableTags = storage.getTags().filter { existing ->
-        selectedTags.none { it.equals(existing, ignoreCase = true) }
+    val allTags by remember { storage.getTags() }.collectAsState(initial = emptyList())
+    val availableTags = remember(allTags, selectedTags) {
+        allTags.filter { existing ->
+            selectedTags.none { sel -> sel.equals(existing, ignoreCase = true) }
+        }
     }
 
     fun tryAddFromInput() {
@@ -67,8 +73,6 @@ fun TagSelector(
             dropdownExpanded = false
         }
     }
-
-    val focusRequest = remember { FocusRequester() }
 
     Box(
         modifier = Modifier.fillMaxWidth()
@@ -109,9 +113,8 @@ fun TagSelector(
                 ) {
                     dropdownExpanded = true
                 }
-                .focusRequester(focusRequest)
                 .onFocusChanged { state ->
-                    if (state.hasFocus) dropdownExpanded = true
+                    dropdownExpanded = if (state.hasFocus) true else dropdownExpanded
                 },
             prefix = {
                 // Render selected tags as removable chips inside the text field
@@ -167,11 +170,6 @@ fun TagSelector(
             } else {
                 filtered.forEachIndexed { index, tag ->
                     DropdownMenuItem(
-                        modifier = Modifier
-                            .onPreviewKeyEvent({ event: KeyEvent ->
-                                focusRequest.requestFocus()
-                                false
-                            }),
                         text = { Text(tag) },
                         onClick = {
                             onAddTag(tag)

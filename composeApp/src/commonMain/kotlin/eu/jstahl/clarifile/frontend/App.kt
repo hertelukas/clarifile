@@ -1,5 +1,7 @@
 package eu.jstahl.clarifile.frontend
 
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.*
@@ -48,7 +50,6 @@ fun App(storage: Storage) {
     MaterialTheme {
         val selectedTags = remember { mutableStateListOf<String>() }
 
-
         Scaffold(
             topBar = {
                 TopAppBar(title = { Text("Clarifile") })
@@ -89,7 +90,7 @@ fun App(storage: Storage) {
                                 storage,
                                 selectedTags = selectedTags,
                                 onAddTag = { tag -> if (tag !in selectedTags) selectedTags.add(tag) },
-                                onRemoveTag = { tag -> selectedTags.remove(tag) }
+                                onRemoveTag = { tag -> selectedTags.remove(tag) },
                             )
                         }
                     }
@@ -97,17 +98,17 @@ fun App(storage: Storage) {
 
                 Column(
                     modifier = Modifier
+                        .weight(1f)
                         .fillMaxWidth()
                         .padding(16.dp)
-                        .safeContentPadding(),
+                        .safeContentPadding()
+                        .verticalScroll(rememberScrollState()),
                     horizontalAlignment = Alignment.Start
                 ) {
                     val files by remember(selectedTags.toList()) { storage.getFiles(FileRequest(selectedTags, LogicalOperator.And)) }
                         .collectAsState(initial = emptyList())
 
                     var editingFile by remember { mutableStateOf<File?>(null) }
-                    var editingName by remember { mutableStateOf("") }
-                    var editingTagsInput by remember { mutableStateOf("") }
 
                     for (file in files) {
                         Box(
@@ -139,8 +140,6 @@ fun App(storage: Storage) {
                                     Text(fileName, modifier = Modifier.weight(1f))
                                     IconButton(onClick = {
                                         editingFile = file
-                                        editingName = fileName
-                                        editingTagsInput = fileTags.joinToString(" ")
                                     }) {
                                         Icon(Icons.Filled.Edit, contentDescription = "Edit")
                                     }
@@ -158,14 +157,13 @@ fun App(storage: Storage) {
                     if (editingFile != null) {
                         FileEditorDialog(
                             storage = storage,
-                            initialName = editingName,
-                            initialTagsInput = editingTagsInput,
+                            file = editingFile!!,
                             onConfirm = { newName, tags ->
-                                // STUB: Implement actual rename / tag updates later
-                                // For now, simply close dialog. You may wire your logic here.
-                                // Example (uncomment to actually rename):
-                                // scope.launch { editingFile?.setName(newName) }
-                                editingFile = null
+                                scope.launch {
+                                    editingFile?.setName(newName)
+                                    editingFile?.setTags(tags)
+                                    editingFile = null
+                                }
                             },
                             onDismiss = { editingFile = null }
                         )
