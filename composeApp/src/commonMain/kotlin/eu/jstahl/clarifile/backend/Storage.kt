@@ -1,6 +1,8 @@
 package eu.jstahl.clarifile.backend
 
-object Storage {
+import eu.jstahl.clarifile.database.FileDao
+
+class Storage(private val dao: FileDao) {
     fun addFile(path: String): File {
         return File("Fyl", emptyList())
     }

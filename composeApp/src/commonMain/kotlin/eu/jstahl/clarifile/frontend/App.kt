@@ -11,15 +11,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import eu.jstahl.clarifile.backend.Storage
 import eu.jstahl.clarifile.database.FileDao
+import eu.jstahl.clarifile.database.FileEntity
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 @Preview
-fun App(dao: FileDao) {
+fun App(storage: Storage) {
+
     MaterialTheme {
         var showContent by remember { mutableStateOf(false) }
 
-        val tags = Storage.getTags()
+        val tags = storage.getTags()
         val tagStates = HashMap<String, MutableState<Boolean>>()
         tags.forEach { tag -> tagStates[tag] = remember { mutableStateOf(true) } }
 

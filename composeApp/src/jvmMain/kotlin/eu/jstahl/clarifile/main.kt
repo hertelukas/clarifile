@@ -3,6 +3,7 @@ package eu.jstahl.clarifile
 import androidx.compose.runtime.remember
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import eu.jstahl.clarifile.backend.Storage
 import eu.jstahl.clarifile.frontend.App
 import eu.jstahl.clarifile.database.getRoomDatabase // Import this!
 
@@ -17,7 +18,9 @@ fun main() = application {
 
     val dao = remember { database.fileDao() }
 
+    val storage = Storage(dao)
+
     Window(onCloseRequest = ::exitApplication, title = "Clarifile") {
-        App(dao)
+        App(storage)
     }
 }
