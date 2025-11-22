@@ -1,6 +1,7 @@
 package eu.jstahl.clarifile.frontend
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,6 +19,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupProperties
 import eu.jstahl.clarifile.backend.Storage
 
+var emptyChar = "\u200B"
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TagSelector(
@@ -28,7 +31,7 @@ fun TagSelector(
     allowFreeText: Boolean = false,
 ) {
     var dropdownExpanded by remember { mutableStateOf(false) }
-    var tagInput by remember { mutableStateOf("") }
+    var tagInput by remember(selectedTags) { mutableStateOf(if (selectedTags.isEmpty()) "" else emptyChar) }
 
     val allTags by remember { storage.getTags() }.collectAsState(initial = emptyList())
     val availableTags = remember(allTags, selectedTags) {
@@ -48,7 +51,7 @@ fun TagSelector(
         }
         toAdd?.let {
             onAddTag(it)
-            tagInput = ""
+            tagInput = emptyChar
             dropdownExpanded = false
         }
     }
@@ -56,21 +59,18 @@ fun TagSelector(
     Box(
         modifier = Modifier.fillMaxWidth()
     ) {
-        // Decide where to show the hint: inline (placeholder) when there are no chips
-        // or when the user is typing; otherwise show it as supporting text underneath
         val showInlinePlaceholder = selectedTags.isEmpty() || tagInput.isNotEmpty()
 
         OutlinedTextField(
             label = { Text("Tags") },
             value = tagInput,
             onValueChange = { value ->
-                tagInput = value
+                tagInput = value.replace(emptyChar, "")
                 dropdownExpanded = true
             },
             singleLine = true,
             placeholder = if (showInlinePlaceholder) ({ Text("Search tags") }) else null,
             trailingIcon = {
-                // Show the standard exposed-dropdown icon to hint interactivity and allow toggling
                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = dropdownExpanded)
             },
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
@@ -83,10 +83,7 @@ fun TagSelector(
                     dropdownExpanded = if (state.hasFocus) true else dropdownExpanded
                 },
             prefix = {
-                // Render selected tags as removable chips inside the text field
-                Row(
-                    // keep chips in a single row to honor singleLine
-                ) {
+                Row {
                     selectedTags.forEach { tag ->
                         LabelChip(
                             text = tag,
@@ -123,7 +120,7 @@ fun TagSelector(
                             text = { Text("Add '$toAdd'") },
                             onClick = {
                                 onAddTag(toAdd)
-                                tagInput = ""
+                                tagInput = emptyChar
                                 dropdownExpanded = false
                             }
                         )
@@ -140,13 +137,13 @@ fun TagSelector(
                         text = {
                             LabelChip(tag, onClick = {
                                 onAddTag(tag)
-                                tagInput = ""
+                                tagInput = emptyChar
                                 dropdownExpanded = false
                             })
                         },
                         onClick = {
                             onAddTag(tag)
-                            tagInput = ""
+                            tagInput = emptyChar
                             dropdownExpanded = false
                         }
                     )
@@ -158,7 +155,7 @@ fun TagSelector(
                             text = { Text("Add '$toAdd'") },
                             onClick = {
                                 onAddTag(toAdd)
-                                tagInput = ""
+                                tagInput = emptyChar
                                 dropdownExpanded = false
                             }
                         )
