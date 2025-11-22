@@ -6,7 +6,7 @@ import eu.jstahl.clarifile.database.AppDatabase
 import java.io.File
 
 fun getDatabaseBuilder(): RoomDatabase.Builder<AppDatabase> {
-    val dbFile = File(System.getProperty("java.io.tmpdir"), "my_room.db")
+    val dbFile = File(System.getProperty("java.io.tmpdir"), "clarifile.db")
     return Room.databaseBuilder<AppDatabase>(
         name = dbFile.absolutePath,
     )

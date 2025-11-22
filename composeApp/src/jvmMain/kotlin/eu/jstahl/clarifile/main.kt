@@ -8,7 +8,7 @@ import androidx.compose.ui.window.rememberWindowState
 import androidx.compose.ui.window.application
 import eu.jstahl.clarifile.backend.Storage
 import eu.jstahl.clarifile.frontend.App
-import eu.jstahl.clarifile.database.getRoomDatabase // Import this!
+import eu.jstahl.clarifile.database.getRoomDatabase
 
 fun main() = application {
     val database = remember {
