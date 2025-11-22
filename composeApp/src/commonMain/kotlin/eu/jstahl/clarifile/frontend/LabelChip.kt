@@ -24,7 +24,7 @@ fun LabelChip(
                 onClick?.invoke()
             }
         },
-        label = { Text(text) },
+        label = { Text(text, style = MaterialTheme.typography.labelSmall) },
         trailingIcon = if (removable) ({ Text("×") }) else null,
         colors = AssistChipDefaults.assistChipColors(
             containerColor = bg,

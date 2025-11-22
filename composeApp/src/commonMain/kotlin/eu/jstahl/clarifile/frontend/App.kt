@@ -82,7 +82,7 @@ fun App(storage: Storage) {
                 .background(MaterialTheme.colorScheme.background)
                 .statusBarsPadding()
                 .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom))
-                .padding(horizontal = ScreenHorizontalPadding, vertical = 16.dp),
+                .padding(horizontal = ScreenHorizontalPadding, vertical = 8.dp),
             horizontalAlignment = Alignment.Start
         ) {
             // Header row with Add file button and dark mode toggle
@@ -117,7 +117,7 @@ fun App(storage: Storage) {
                     )
                 }
             }
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
             Surface(
                 modifier = Modifier
                     .fillMaxWidth(),
@@ -128,7 +128,7 @@ fun App(storage: Storage) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
+                        .padding(8.dp),
                     horizontalAlignment = Alignment.Start
                 ) {
                     Row(
@@ -152,7 +152,7 @@ fun App(storage: Storage) {
                             OutlinedTextField(
                                 modifier = Modifier
                                     .menuAnchor()
-                                    .width(150.dp),
+                                    .width(120.dp),
                                 value = selectedExtension ?: "All",
                                 onValueChange = {},
                                 readOnly = true,
@@ -226,7 +226,7 @@ fun App(storage: Storage) {
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(16.dp),
+                                .padding(6.dp),
                             horizontalAlignment = Alignment.Start
                         ) {
                             val fileName by produceState(initialValue = "Loading...", file) {
@@ -241,8 +241,18 @@ fun App(storage: Storage) {
                                 modifier = Modifier.fillMaxWidth(),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(fileName, modifier = Modifier.weight(1f))
-                                Text(".$fileExtension")
+                                Text(
+                                    fileName,
+                                    modifier = Modifier.weight(1f),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    maxLines = 1
+                                )
+                                Spacer(Modifier.width(6.dp))
+                                Text(
+                                    ".$fileExtension",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.8f)
+                                )
                                 IconButton(onClick = {
                                     editingFile = file
                                 }) {
@@ -251,8 +261,8 @@ fun App(storage: Storage) {
                             }
                             if (fileTags.isNotEmpty()) {
                                 FlowRow(
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                    verticalArrangement = Arrangement.spacedBy(4.dp)
                                 ) {
                                     fileTags.forEach { tag ->
                                         LabelChip(text = tag)
@@ -261,7 +271,7 @@ fun App(storage: Storage) {
                             }
                         }
                     }
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
                 }
 
                 if (editingFile != null) {
