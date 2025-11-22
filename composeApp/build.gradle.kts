@@ -8,6 +8,13 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeHotReload)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.androidx.room)
+}
+
+// Put this anywhere at the top level of the file, e.g., after the plugins block
+room {
+    schemaDirectory("$projectDir/schemas")
 }
 
 kotlin {
@@ -29,17 +36,6 @@ kotlin {
     
     jvm()
     
-    js {
-        browser()
-        binaries.executable()
-    }
-    
-    @OptIn(ExperimentalWasmDsl::class)
-    wasmJs {
-        browser()
-        binaries.executable()
-    }
-    
     sourceSets {
         androidMain.dependencies {
             implementation(compose.preview)
@@ -55,6 +51,8 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
+            implementation(libs.androidx.room.runtime)
+            implementation(libs.androidx.sqlite.bundled)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -95,6 +93,12 @@ android {
 
 dependencies {
     debugImplementation(compose.uiTooling)
+    add("kspJvm", libs.androidx.room.compiler)
+    add("kspAndroid", libs.androidx.room.compiler)
+    add("kspIosSimulatorArm64", libs.androidx.room.compiler)
+    // add("kspIosX64", libs.androidx.room.compiler)
+    add("kspIosArm64", libs.androidx.room.compiler)
+    // Add any other platform target you use in your project, for example kspDesktop
 }
 
 compose.desktop {

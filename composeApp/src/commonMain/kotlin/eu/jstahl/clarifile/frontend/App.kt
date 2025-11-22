@@ -10,11 +10,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import eu.jstahl.clarifile.backend.Storage
+import eu.jstahl.clarifile.database.FileDao
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 @Preview
-fun App() {
+fun App(dao: FileDao) {
     MaterialTheme {
         var showContent by remember { mutableStateOf(false) }
 
