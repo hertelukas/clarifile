@@ -1,5 +1,6 @@
 package eu.jstahl.clarifile.frontend
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,9 +10,12 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.PopupProperties
 import eu.jstahl.clarifile.backend.Storage
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,9 +53,7 @@ fun TagSelector(
         }
     }
 
-    ExposedDropdownMenuBox(
-        expanded = dropdownExpanded,
-        onExpandedChange = { dropdownExpanded = it },
+    Box(
         modifier = Modifier.fillMaxWidth()
     ) {
         // Decide where to show the hint: inline (placeholder) when there are no chips
@@ -73,25 +75,9 @@ fun TagSelector(
             },
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(onDone = {
-                val filtered = if (tagInput.isBlank()) availableTags else availableTags.filter {
-                    it.contains(tagInput, ignoreCase = true)
-                }
-                if (dropdownExpanded && filtered.isNotEmpty()) {
-                    // When free text disabled, add the first suggestion on IME action
-                    if (!allowFreeText) {
-                        onAddTag(filtered.first())
-                        tagInput = ""
-                        dropdownExpanded = false
-                    } else {
-                        // With free text, try adding the current input
-                        tryAddFromInput()
-                    }
-                } else {
-                    tryAddFromInput()
-                }
+                tryAddFromInput()
             }),
             modifier = Modifier
-                .menuAnchor()
                 .fillMaxWidth()
                 .onFocusChanged { state ->
                     dropdownExpanded = if (state.hasFocus) true else dropdownExpanded
@@ -119,9 +105,10 @@ fun TagSelector(
         }
         val hasSuggestions = filtered.isNotEmpty()
 
-        ExposedDropdownMenu(
+        DropdownMenu(
             expanded = dropdownExpanded && (hasSuggestions || (allowFreeText && tagInput.isNotBlank())),
             onDismissRequest = { dropdownExpanded = false },
+            properties = PopupProperties(focusable = false),
         ) {
             if (!allowFreeText && availableTags.isEmpty()) {
                 DropdownMenuItem(
