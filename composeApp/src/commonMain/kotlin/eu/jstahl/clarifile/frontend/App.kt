@@ -29,26 +29,28 @@ fun App(storage: Storage) {
         Scaffold(
             topBar = {
                 TopAppBar(title = { Text("Clarifile") })
-            },
-            floatingActionButton = {
-                ExtendedFloatingActionButton(onClick = { }) {
-                    Text("Add file")
-                }
             }
         ) { paddingValues ->
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .padding(16.dp)
                     .background(MaterialTheme.colorScheme.surface)
                     .safeContentPadding()
                     .padding(paddingValues),
                 horizontalAlignment = Alignment.Start,
             ) {
+                Button(onClick = {
+                    storage.addFile("~/geheimedokumente.txb")
+                }) {
+                    Text("Add file")
+                }
                 Column(modifier =
                     Modifier.padding(16.dp)
                         .fillMaxWidth()) {
                     // Single text field tag selector with chips inside
                     TagSelector(
+                        storage,
                         selectedTags = selectedTags,
                         onAddTag = { tag -> if (tag !in selectedTags) selectedTags.add(tag) },
                         onRemoveTag = { tag -> selectedTags.remove(tag) }

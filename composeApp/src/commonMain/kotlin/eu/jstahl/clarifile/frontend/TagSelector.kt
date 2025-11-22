@@ -1,6 +1,5 @@
 package eu.jstahl.clarifile.frontend
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -21,7 +20,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -35,6 +33,7 @@ import eu.jstahl.clarifile.backend.Storage
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TagSelector(
+    storage: Storage,
     selectedTags: List<String>,
     onAddTag: (String) -> Unit,
     onRemoveTag: (String) -> Unit = {},
@@ -43,7 +42,7 @@ fun TagSelector(
     var tagInput by remember { mutableStateOf("") }
     var highlightedIndex by remember { mutableStateOf(0) }
 
-    val availableTags = Storage.getTags().filter { existing ->
+    val availableTags = storage.getTags().filter { existing ->
         selectedTags.none { it.equals(existing, ignoreCase = true) }
     }
 
