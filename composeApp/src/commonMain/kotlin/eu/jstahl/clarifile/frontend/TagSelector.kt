@@ -74,7 +74,7 @@ fun TagSelector(
                 tagInput = value
                 dropdownExpanded = true
             },
-            singleLine = false,
+            singleLine = true,
             placeholder = { Text("Search tags") },
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(onDone = {
