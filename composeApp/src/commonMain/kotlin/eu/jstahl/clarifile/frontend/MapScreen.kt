@@ -6,7 +6,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -23,7 +22,6 @@ import androidx.compose.ui.unit.dp
 import eu.jstahl.clarifile.backend.File
 import eu.jstahl.clarifile.backend.GeoLocation
 import eu.jstahl.clarifile.backend.Storage
-import kotlinx.coroutines.launch
 import kotlin.math.*
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
