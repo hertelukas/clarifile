@@ -29,10 +29,10 @@ class Storage(private val dao: FileDao, private val fileStorage: FileStorage) {
         }
     }
 
-    suspend fun addFile(path: String): File {
-        val extension = path.substringAfterLast(".", "")
+    suspend fun addFile(path: String, name: String, extension: String): File {
+        val name = name.substringBeforeLast(".", "")
 
-        val id = dao.insertFile(FileEntity(name = path, extension = extension))
+        val id = dao.insertFile(FileEntity(name = name, extension = extension))
         fileStorage.saveFile(path, id)
 
         val file = File(id, dao, fileStorage)
