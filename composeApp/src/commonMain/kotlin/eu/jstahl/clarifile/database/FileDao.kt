@@ -135,6 +135,6 @@ abstract class FileDao {
     @Query("SELECT DISTINCT content FROM tags")
     abstract fun getDistinctTags(): Flow<List<String>>
 
-    @Query("SELECT DISTINCT extension FROM files WHERE extension != '' ORDER BY extension")
+    @Query("SELECT DISTINCT extension FROM files WHERE extension IS NOT NULL AND extension != '' ORDER BY extension")
     abstract fun getDistinctExtensions(): Flow<List<String>>
 }
