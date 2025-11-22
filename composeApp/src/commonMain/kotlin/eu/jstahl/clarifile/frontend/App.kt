@@ -5,7 +5,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -94,7 +97,8 @@ fun App(storage: Storage) {
                         .safeContentPadding(),
                     horizontalAlignment = Alignment.Start
                 ) {
-                    val files = remember(selectedTags.toList()) { storage.getFile(FileRequest(selectedTags, LogicalOperator.And)) }
+                    val files by remember(selectedTags.toList()) { storage.getFiles(FileRequest(selectedTags, LogicalOperator.And)) }
+                        .collectAsState(initial = emptyList())
 
                     for (file in files) {
                         Box(
@@ -114,7 +118,10 @@ fun App(storage: Storage) {
                                     .safeContentPadding(),
                                 horizontalAlignment = Alignment.Start
                             ) {
-                                Text(file.getName())
+                                val fileName by produceState(initialValue = "Loading...", file) {
+                                    value = file.getName()
+                                }
+                                Text(fileName)
                                 if (file.getTags().isNotEmpty())
                                     Text(
                                         file.getTags().joinToString(", "),
