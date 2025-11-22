@@ -18,13 +18,13 @@ class Storage(private val dao: FileDao, private val fileStorage: FileStorage) {
 
     fun getFiles(fileRequest: FileRequest): Flow<List<File>> {
         val flow: Flow<List<Long>> = when {
-            fileRequest.tags.isEmpty() -> dao.getAllFiles()
+            fileRequest.tags.isEmpty() -> dao.searchFilesByName(fileRequest.searchString)
 
             fileRequest.tagOperator == LogicalOperator.Or ->
-                dao.getFilesByAnyTag(fileRequest.tags)
+                dao.getFilesByAnyTag(fileRequest.searchString, fileRequest.tags)
 
             fileRequest.tagOperator == LogicalOperator.And ->
-                dao.getFilesByAllTags(fileRequest.tags, fileRequest.tags.size)
+                dao.getFilesByAllTags(fileRequest.searchString, fileRequest.tags, fileRequest.tags.size)
 
             else -> dao.getAllFiles() // Fallback
         }

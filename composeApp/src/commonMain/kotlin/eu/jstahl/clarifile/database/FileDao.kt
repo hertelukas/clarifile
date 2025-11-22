@@ -21,6 +21,9 @@ abstract class FileDao {
     @Query("SELECT id FROM files")
     abstract fun getAllFiles(): Flow<List<Long>>
 
+    @Query("SELECT id FROM files WHERE name LIKE '%' || :searchString || '%'")
+    abstract fun searchFilesByName(searchString: String): Flow<List<Long>>
+
     // 2. OR Logic: Files that match at least one tag
     @Transaction
     @Query("""
@@ -28,22 +31,21 @@ abstract class FileDao {
         INNER JOIN file_tags ft ON f.id = ft.fileId
         INNER JOIN tags t ON ft.tagId = t.id
         WHERE t.content IN (:tags)
+        AND (f.name LIKE '%' || :searchString || '%')
     """)
-    abstract fun getFilesByAnyTag(tags: List<String>): Flow<List<Long>>
+    abstract fun getFilesByAnyTag(searchString: String, tags: List<String>): Flow<List<Long>>
 
-    // 3. AND Logic: Files that have ALL specified tags
-    // We filter for files containing the tags, group by file,
-    // and ensure the count of matches equals the number of requested tags.
     @Transaction
     @Query("""
-        SELECT f.id FROM files f
-        INNER JOIN file_tags ft ON f.id = ft.fileId
-        INNER JOIN tags t ON ft.tagId = t.id
-        WHERE t.content IN (:tags)
-        GROUP BY f.id
-        HAVING COUNT(DISTINCT t.content) = :tagCount
-    """)
-    abstract fun getFilesByAllTags(tags: List<String>, tagCount: Int): Flow<List<Long>>
+    SELECT f.id FROM files f
+    INNER JOIN file_tags ft ON f.id = ft.fileId
+    INNER JOIN tags t ON ft.tagId = t.id
+    WHERE t.content IN (:tags)
+    AND (f.name LIKE '%' || :searchString || '%')
+    GROUP BY f.id
+    HAVING COUNT(DISTINCT t.content) = :tagCount
+""")
+    abstract fun getFilesByAllTags(searchString: String, tags: List<String>, tagCount: Int): Flow<List<Long>>
 
     @Transaction
     @Query("SELECT f.name FROM files f WHERE id = :id")
