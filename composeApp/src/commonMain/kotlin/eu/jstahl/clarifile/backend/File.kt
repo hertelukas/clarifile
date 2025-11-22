@@ -34,6 +34,10 @@ class File(private val id: Long, private val dao: FileDao, private val fileStora
         fileStorage.open(id)
     }
 
+    fun getGpsLocation(): GeoLocation? {
+        return fileStorage.getGpsLocation(id)
+    }
+
     suspend fun getExtension(): String {
         return dao.getFileExtensionByID(id)
     }

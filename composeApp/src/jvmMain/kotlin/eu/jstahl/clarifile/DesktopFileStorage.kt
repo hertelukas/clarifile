@@ -1,6 +1,9 @@
 package eu.jstahl.clarifile
 
+import com.drew.imaging.ImageMetadataReader
+import com.drew.metadata.exif.GpsDirectory
 import eu.jstahl.clarifile.backend.FileStorage
+import eu.jstahl.clarifile.backend.GeoLocation
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.awt.Desktop
@@ -56,6 +59,28 @@ class DesktopFileStorage : FileStorage {
             }
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+    }
+
+    override fun getGpsLocation(id: Long): GeoLocation? {
+        println("Getting GPS location for ID $id")
+        return try {
+            val file = File(getAbsolutePath(id))
+            // Metadata-extractor works with standard Java Files
+            val metadata = ImageMetadataReader.readMetadata(file)
+            val gpsDir = metadata.getFirstDirectoryOfType(GpsDirectory::class.java)
+            val location = gpsDir?.geoLocation
+
+            println("GPS location: $location")
+
+            if (location != null && !location.isZero) {
+                GeoLocation(location.latitude, location.longitude)
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            // Fails silently if file is not an image or has no metadata
+            null
         }
     }
 }

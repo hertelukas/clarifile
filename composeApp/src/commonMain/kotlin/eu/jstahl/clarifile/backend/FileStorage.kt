@@ -8,4 +8,6 @@ interface FileStorage {
     fun getAbsolutePath(id: Long): String
 
     fun open(id: Long)
+
+    fun getGpsLocation(id: Long): GeoLocation?
 }
