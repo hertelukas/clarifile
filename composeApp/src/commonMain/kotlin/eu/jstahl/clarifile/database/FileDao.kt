@@ -66,6 +66,9 @@ abstract class FileDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     abstract suspend fun insertFileTagCrossRef(crossRef: FileTag)
 
+    @Query("DELETE FROM file_tags WHERE fileId = :fileId")
+    abstract suspend fun removeTags(fileId: Long)
+
     @Transaction
     open suspend fun addTagToFile(fileId: Long, tagContent: String) {
         // 1. Check if tag exists

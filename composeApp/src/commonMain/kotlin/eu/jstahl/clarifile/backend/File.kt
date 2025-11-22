@@ -20,4 +20,13 @@ class File(private val id: Long, private val dao: FileDao) {
     suspend fun addTag(tag: String) {
         dao.addTagToFile(id, tag)
     }
+
+    suspend fun removeAllTags() {
+        dao.removeTags(id)
+    }
+
+    suspend fun setTags(tags: List<String>) {
+        removeAllTags()
+        tags.forEach { dao.addTagToFile(id, it) }
+    }
 }
