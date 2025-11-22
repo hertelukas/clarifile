@@ -21,6 +21,10 @@ abstract class FileDao {
     @Query("SELECT id FROM files")
     abstract fun getAllFiles(): Flow<List<Long>>
 
+    @Transaction
+    @Query("SELECT content FROM tags")
+    abstract fun getAllTags(): Flow<List<String>>
+
     @Query("SELECT id FROM files WHERE name LIKE '%' || :searchString || '%'")
     abstract fun searchFilesByName(searchString: String): Flow<List<Long>>
 

@@ -32,8 +32,8 @@ class Storage(private val dao: FileDao, private val fileStorage: FileStorage) {
         return flow.map { files -> files.map { id -> File(id, dao) } }
     }
 
-    fun getTags(): List<String> {
-        return listOf("a", "b", "c")
+    fun getTags(): Flow<List<String>> {
+        return dao.getAllTags()
     }
 
     fun getExtensions(): List<String> {
