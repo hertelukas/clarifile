@@ -4,7 +4,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -61,8 +60,6 @@ fun App(storage: Storage) {
         
         // Get current dark mode state for icon display
         val isDarkMode = themeState.isDarkMode()
-        // Need system theme for toggle logic when in SYSTEM mode
-        val systemInDarkTheme = isSystemInDarkTheme()
 
         Column(
             modifier = Modifier
@@ -93,13 +90,7 @@ fun App(storage: Storage) {
                 
                 // Dark mode toggle
                 IconButton(
-                    onClick = {
-                        themeState.themeMode = when (themeState.themeMode) {
-                            ThemeMode.LIGHT -> ThemeMode.DARK
-                            ThemeMode.DARK -> ThemeMode.LIGHT
-                            ThemeMode.SYSTEM -> if (systemInDarkTheme) ThemeMode.LIGHT else ThemeMode.DARK
-                        }
-                    }
+                    onClick = { themeState.toggle() }
                 ) {
                     Icon(
                         imageVector = if (isDarkMode) 

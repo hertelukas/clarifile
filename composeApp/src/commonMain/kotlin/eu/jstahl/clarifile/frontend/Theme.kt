@@ -5,6 +5,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -22,6 +23,7 @@ enum class ThemeMode {
     SYSTEM
 }
 
+@Stable
 class ThemeState {
     var themeMode by mutableStateOf(ThemeMode.SYSTEM)
     
@@ -32,6 +34,16 @@ class ThemeState {
             ThemeMode.LIGHT -> false
             ThemeMode.DARK -> true
             ThemeMode.SYSTEM -> systemInDarkTheme
+        }
+    }
+    
+    @Composable
+    fun toggle() {
+        val systemInDarkTheme = isSystemInDarkTheme()
+        themeMode = when (themeMode) {
+            ThemeMode.LIGHT -> ThemeMode.DARK
+            ThemeMode.DARK -> ThemeMode.LIGHT
+            ThemeMode.SYSTEM -> if (systemInDarkTheme) ThemeMode.LIGHT else ThemeMode.DARK
         }
     }
 }
