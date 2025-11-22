@@ -63,7 +63,6 @@ class DesktopFileStorage : FileStorage {
     }
 
     override fun getGpsLocation(id: Long): GeoLocation? {
-        println("Getting GPS location for ID $id")
         return try {
             val file = File(getAbsolutePath(id))
             // Metadata-extractor works with standard Java Files

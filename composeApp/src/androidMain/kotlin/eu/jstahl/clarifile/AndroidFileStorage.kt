@@ -6,7 +6,10 @@ import android.net.Uri
 import android.provider.OpenableColumns
 import android.webkit.MimeTypeMap
 import androidx.core.content.FileProvider
+import com.drew.imaging.ImageMetadataReader
+import com.drew.metadata.exif.GpsDirectory
 import eu.jstahl.clarifile.backend.FileStorage
+import eu.jstahl.clarifile.backend.GeoLocation
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -110,5 +113,26 @@ class AndroidFileStorage(private val context: Context) : FileStorage {
             }
         }
         return result ?: "unknown_file"
+    }
+
+    override fun getGpsLocation(id: Long): GeoLocation? {
+        return try {
+            val file = File(getAbsolutePath(id))
+            // Metadata-extractor works with standard Java Files
+            val metadata = ImageMetadataReader.readMetadata(file)
+            val gpsDir = metadata.getFirstDirectoryOfType(GpsDirectory::class.java)
+            val location = gpsDir?.geoLocation
+
+            println("GPS location: $location")
+
+            if (location != null && !location.isZero) {
+                GeoLocation(location.latitude, location.longitude)
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            // Fails silently if file is not an image or has no metadata
+            null
+        }
     }
 }
