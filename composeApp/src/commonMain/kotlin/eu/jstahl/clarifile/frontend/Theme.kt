@@ -25,7 +25,9 @@ enum class ThemeMode {
 
 @Stable
 class ThemeState {
-    var themeMode by mutableStateOf(ThemeMode.SYSTEM)
+    private var _themeMode by mutableStateOf(ThemeMode.SYSTEM)
+    val themeMode: ThemeMode
+        get() = _themeMode
     
     @Composable
     fun isDarkMode(): Boolean {
@@ -40,7 +42,7 @@ class ThemeState {
     @Composable
     fun toggle() {
         val systemInDarkTheme = isSystemInDarkTheme()
-        themeMode = when (themeMode) {
+        _themeMode = when (_themeMode) {
             ThemeMode.LIGHT -> ThemeMode.DARK
             ThemeMode.DARK -> ThemeMode.LIGHT
             ThemeMode.SYSTEM -> if (systemInDarkTheme) ThemeMode.LIGHT else ThemeMode.DARK
