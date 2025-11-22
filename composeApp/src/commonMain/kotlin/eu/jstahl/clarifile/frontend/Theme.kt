@@ -39,13 +39,11 @@ class ThemeState {
         }
     }
     
-    @Composable
-    fun toggle() {
-        val systemInDarkTheme = isSystemInDarkTheme()
+    fun toggle(currentSystemTheme: Boolean) {
         _themeMode = when (_themeMode) {
             ThemeMode.LIGHT -> ThemeMode.DARK
             ThemeMode.DARK -> ThemeMode.LIGHT
-            ThemeMode.SYSTEM -> if (systemInDarkTheme) ThemeMode.LIGHT else ThemeMode.DARK
+            ThemeMode.SYSTEM -> if (currentSystemTheme) ThemeMode.LIGHT else ThemeMode.DARK
         }
     }
 }

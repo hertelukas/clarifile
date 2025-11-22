@@ -4,6 +4,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -58,7 +59,8 @@ fun App(storage: Storage) {
         var searchName by remember { mutableStateOf("") }
         val selectedTags = remember { mutableStateListOf<String>() }
         
-        // Get current dark mode state for icon display
+        // Get system theme and current dark mode state
+        val systemInDarkTheme = isSystemInDarkTheme()
         val isDarkMode = themeState.isDarkMode()
 
         Column(
@@ -90,7 +92,7 @@ fun App(storage: Storage) {
                 
                 // Dark mode toggle
                 IconButton(
-                    onClick = { themeState.toggle() }
+                    onClick = { themeState.toggle(systemInDarkTheme) }
                 ) {
                     Icon(
                         imageVector = if (isDarkMode) 
