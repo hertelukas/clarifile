@@ -65,6 +65,10 @@ kotlin {
             implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
             implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
         }
+        // Provide HTTP engine for iOS targets (Darwin)
+        iosMain.dependencies {
+            implementation("io.ktor:ktor-client-darwin:$ktorVersion")
+        }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }
